@@ -8,7 +8,7 @@
 1.4. Create a NODE ( choose name for it ) 
 1.5. Click on the node in the Nodes List to get to Node Info and make notes of ID and  Key ( Network Key)
 
-**
+
 optional: ( if you do not have a local coverage and you need to have your own gateway)
 1.6. Create Gateway in the USER AREA ( set name, coordinates and is it open or private - please choose open to make easy the initial example process)  
 / in case you DO decide to use private gateway then you will need to pass the gateway id when constructing the IoTThing object/
@@ -28,7 +28,7 @@ optional: ( if you do not have a local coverage and you need to have your own ga
 - Setup Gateway Details: fill GATEWAY ID and GATEWAY KEY ( provided from the user area of www.i4things.com) and click "Send to Gateway”.
 - Setup Frequency : fill the FREQUENCY with one of the following : 868.1 , 868.3 or 868.5 ( only this frequencies are supported for private gateway) and click "Send to Gateway”. 10 Finally Click “Get Configuration” and if all is OK the SSID, PASS, GATEWAY ID, GATEWAY KEY, FREQUENCY should have the values you have configured.
 - Restart The Gateway (non mandatory)
-**
+
 
 2. Download the example for the breadboard that you have - we have examples for Adafruit32u4 Lora, Heltec Lora 32 and TTGO Lora
 / The library and examples will work with almost all board with LoRa - you just need to pass the appropriate PINS/
