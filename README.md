@@ -91,6 +91,7 @@ class IoTThing
 
 Example how to use the API:
 
+```
 #include "IoTThing.h"
 
 
@@ -158,6 +159,8 @@ void loop() {
   }
 
 }
+
+```
 IMPORTANT
 
 For the simple open source node library you will also need to download and make available the RadioHead library from : https://www.airspayce.com/mikem/arduino/RadioHead/index.html
@@ -168,13 +171,17 @@ PRACTICALITY AND EFFICIENCY
 
 In the API there are found very helpful static functions related to easy and efficient way of representing data in byte buffer(byte array) message :
 
+```
 static void add_discrete(uint8_t buf_[], uint8_t &pos_, double min_, double max_, double value_, uint8_t container_size_);
 static double get_discrete(uint8_t buf_[], uint8_t &pos_, double min_, double max_, uint8_t container_size_);
 
 static void add_uint(uint8_t buf_[], uint8_t &pos_, uint64_t value_);
 static uint64_t get_uint(uint8_t buf_[], uint8_t &pos_);
+```
+
 Using the add/get discrete you can add to the buffer and read from the buffer discrete values - e.g. if you want to store temperate in the interval between -20C and +60C efficiently in only one byte but still having better resolution then 1/2 degree then you can use the discrete functions in the following fashion:
 
+```
 uint8_t buf[2];
 uint8_t buf_pos = 0;
 
@@ -189,8 +196,12 @@ buf_pos = 0;
 
 double temp1_read_from_buffer = IoTThing::get_discrete(buf,buf_pos, -20.0, 60.0, 1);
 double temp2_read_from_buffer = IoTThing::get_discrete(buf,buf_pos, -20.0, 60.0, 1);
+
+```
+
 Using the add/get uint you can add to the buffer and read from the buffer positive integer values between 0 and 4611686018427387904. The value will be stored in the minimum possible bytes e.g. if the value can fit in one byte it will occupy only one byte, if it can fit in 2 bytes it will occupy only two bytes and etc. up to 8 bytes. This way you can save space in the message, be efficient and optimize your traffic:
 
+```
 uint8_t buf[8]; // make sure we have space for maximum size
 uint8_t buf_pos = 0;
 
@@ -201,3 +212,4 @@ IoTThing::add_uint(buf, buf_pos, 500); // will occupy only 2 bytes
 buf_pos = 0;
 int val1 = (int)IoTThing::get_uint(buf, buf_pos);
 int val2 = (int)IoTThing::get_uint(buf, buf_pos);
+```
