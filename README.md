@@ -2,7 +2,7 @@
 Node/Device/Thing  Data Send/Receive API 
 
 On the node/thing side i4things provide one simple straight forward class that can be used to deliver data to the authority/server.
-
+{
 class IoTThing
 {
   public:
@@ -86,6 +86,8 @@ class IoTThing
     // please call in the main loop to be able to dispatch data and menage logic
     void work();
 };
+
+}
 
 
 Example how to use the API:
