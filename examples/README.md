@@ -22,8 +22,11 @@ optional: ( if you do not have a local coverage and you need to have your own ga
 1.9. Run the application and follow the next instructions to configure your new gateway:
 
 - Download and install USB driver for your gateway from: https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers
-- Download and install the configurator from from this repository ( GatewayUI)
+- Download and unzip the gateway software : gateway_heltec.zip or gateway_ttgo.zip ( depending on the hardware that you choose for your gateway )
 - Connect the device using USB to micro USB cable.
+- Edit the file upload.cmd - to have teh correct COMport on which teh gateways is attached
+- Execute upload.cmd
+- Download and install the configurator from from this repository ( GatewayUI)
 - Start The configurator
 - Click “Refresh”
 - Click “Connect”
