@@ -37,7 +37,9 @@ optional: ( if you do not have a local coverage and you need to have your own ga
 
 2. Download the example for the breadboard that you have - we have examples for Adafruit32u4 Lora, Heltec Lora 32 and TTGO Lora
 / The library and examples will work with almost all board with LoRa - you just need to pass the appropriate PINS/
+
 3. Compile and upload teh exmaple
+
 4. Open the .html page that in is the example folder in a browser and you will be able to see data from and send data to the node
 
 IMPORTANT: Download and make available the RadioHead library from : https://www.airspayce.com/mikem/arduino/RadioHead/index.html
