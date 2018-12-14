@@ -105,7 +105,7 @@ var yesterday_idx = 0;
 		 });
 		 
 // get hostory data for yesterday - index 0
-         i4things_load_script("http://127.0.0.1:5408/iot_get_hist/" + i4things_get_data_hist_request(thing_id, yesterday_idx, thing_network_key) , function() {
+         i4things_load_script("http://server.i4things.com:5408/iot_get_hist/" + i4things_get_data_hist_request(thing_id, yesterday_idx, thing_network_key) , function() {
 		 /**********************************************************\
 					The Server will return : var iot_json = '{....}';
          \**********************************************************/
