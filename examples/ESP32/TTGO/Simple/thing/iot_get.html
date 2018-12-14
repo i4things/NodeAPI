@@ -5,6 +5,7 @@
 
 <p><div id="iot_data_dump"></div></p>
 
+<p><div id="iot_data_hist_dump"></div></p>
 
 <script  src="http://i4things.com/assets/i4t/js/i4things.js"> </script>
 
@@ -48,6 +49,36 @@ function iot_json_function(data, key) {
  document.getElementById("iot_data_dump").innerHTML = out;
 }
 
+function iot_json_hist_function(data, key) {
+        var json_data = JSON.parse(data);
+		
+		 /**********************************************************\
+					Place your code here
+         \**********************************************************/
+		
+        var out = "Thing: " + json_data.thing + "<br>";
+		var out = "Day Index From History: " + json_data.hist + "<br>";
+        for (i = 0; i < json_data.day.length; i++) {
+		  out += "<hr><p>";
+          out += "&nbsp;Time: " + new Date(json_data.day[i].t) + "<br>";
+          out += "&nbsp;Signal Strength: " + json_data.day[i].r + "%<br>";
+		  out += "&nbsp;Triangulated Lat: " + json_data.day[i].l + "<br>";
+		  out += "&nbsp;Triangulated Lon: " + json_data.day[i].n + "<br>";
+          out += "&nbsp;Data: "
+		  
+		  var decrypted_data = i4things_xxtea_decrypt(json_data.day[i].d, key);
+          
+		  for (j = 0; j < decrypted_data.length; j++) {
+             out +=  decrypted_data[j] + " ";
+          }
+		  
+          out += "<br>";
+		  out += "<\p>";
+		  
+        }
+ document.getElementById("iot_data_hist_dump").innerHTML = out;
+}
+
 </script>
 
 <script> 
@@ -63,6 +94,7 @@ function iot_json_function(data, key) {
 var thing_id = 4;
 var thing_network_key = "015F43957CAECEFB0676290ADDF4A43D";
 var thing_private_key = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+var yesterday_idx = 0;
 		 
 // get todays data		 
          i4things_load_script("http://server.i4things.com:5408/iot_get/" + i4things_get_data_request(thing_id, thing_network_key) , function() {
@@ -71,7 +103,14 @@ var thing_private_key = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
          \**********************************************************/
 			iot_json_function(iot_json, thing_private_key);
 		 });
-		
+
+// get hostory data for yesterday - index 0
+         i4things_load_script("http://127.0.0.1:5408/iot_get_hist/" + i4things_get_data_hist_request(thing_id, yesterday_idx, thing_network_key) , function() {
+		 /**********************************************************\
+					The Server will return : var iot_json = '{....}';
+         \**********************************************************/
+			iot_json_hist_function(iot_json, thing_private_key);
+		 });		 
 
 		 
 </script>
