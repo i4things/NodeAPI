@@ -57,7 +57,7 @@ function iot_json_hist_function(data, key) {
          \**********************************************************/
 		
         var out = "Thing: " + json_data.thing + "<br>";
-		var out = "Day Index From History: " + json_data.hist + "<br>";
+		    out += "Day Index From History: " + json_data.hist + "<br>";
         for (i = 0; i < json_data.day.length; i++) {
 		  out += "<hr><p>";
           out += "&nbsp;Time: " + new Date(json_data.day[i].t) + "<br>";
