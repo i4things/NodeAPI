@@ -163,7 +163,7 @@ void loop() {
 ```
 IMPORTANT
 
-For the simple open source node library you will also need to download and make available the RadioHead library from : https://www.airspayce.com/mikem/arduino/RadioHead/index.html
+For the simple open source node library you will also need to download and make available the RadioHead library : RadioHead.zip - the provided one has a bugfix on ESP32 platform.
 
  
 
