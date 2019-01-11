@@ -51,7 +51,9 @@ void setup() {
   MESSAGE_LAST_SEND = millis() + MESSAGE_INTERVAL * 2;
 
   // init serial
-  Serial.begin(11520);
+  Serial.begin(115200);
+   // Initial delay to give chance to the com port to cennect
+  delay(2000);
   // thing init
   thing.init();
 
