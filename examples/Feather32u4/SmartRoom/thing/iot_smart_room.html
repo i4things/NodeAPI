@@ -1,0 +1,327 @@
+<html>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBrVob3i_9Jd7KGKtgkptQoD9h3AFd7ZCw"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+<link rel="icon" type="image/png" href="favicon_so.png">
+<title>IoT Smart Office</title>
+<!-- iOS -->
+<link rel="apple-touch-icon" href="i_120_120_so.png">
+<link rel="apple-touch-icon" sizes="152x152" href="i_152_152_so.png">
+<link rel="apple-touch-icon" sizes="180x180" href="i_180_180_so.png">
+<link rel="apple-touch-icon" sizes="167x167" href="i_167_167_so.png">
+</head>
+<body>
+
+<div class="container-fluid">
+	<div class="row">
+	</br>
+	</div>
+	<div class="row">
+		<div class="col-lg-12">
+		  <h3 class="text-center ">IoT Smart Office</h3>	 
+		</div>		
+	</div>
+	<div class="row">
+	</br>
+	</div>
+  <div class="row">
+    <div class="col-lg-2 col-xs-1">
+      <br>
+    </div>
+    <div class="col-lg-8 col-xs-10">
+		<div>
+		<hr />
+			<div class="form-group row">
+			
+			<div class="col-lg-3 col-xs-12">
+			  <button type="submit" class="btn btn-primary btn-block btn-lg" id="sendLightONButton"><span class="glyphicon glyphicon-ok"></span>&nbsp;Turn Lights On</button>
+			</div>
+			<div class="col-lg-1 col-xs-1">
+			  &nbsp;
+			</div>
+			<div class="col-lg-3 col-xs-12">
+			  <button type="submit" class="btn btn-primary btn-block btn-lg" id="sendLightOFFButton"><span class="glyphicon glyphicon-remove"></span>&nbsp;Turn Lights Off</button>
+			</div>
+			<div class="col-lg-1 col-xs-1">
+			  &nbsp;
+			</div>
+			<div class="col-lg-3 col-xs-12">
+			  <button type="submit" class="btn btn-primary btn-block btn-lg" id="sendDoorOpenButton"><span class="glyphicon glyphicon-lock"></span>&nbsp;Open Door</button>
+			</div>
+		  </div>
+		  <hr />
+		   <div class="form-group row">
+			   <div class="col-sm-6">
+					<div id="googleMap" style="width:100%;height:200px;"></div>
+			   </div>
+			    <div class="col-sm-6">
+				<!-- subform start-->
+					<div class="form-group row">
+						<label for="inputLastUpdated" class="col-sm-6 col-form-label text-right">Last Updated: </label>
+						<div class="col-sm-6">
+						  <input type="text" class="form-control" id="inputLastUpdated" readonly>
+						</div>
+					  </div>
+					  <div class="form-group row">
+						<label for="inputSignalStrength" class="col-sm-6 col-form-label text-right">Signal Strength: </label>
+						<div class="col-sm-6">
+						  <input type="text" class="form-control" id="inputSignalStrength" readonly>
+						</div>
+					  </div>
+					  <div class="form-group row">
+						<label for="inputLat" class="col-sm-6 col-form-label text-right">Triangulated Lat: </label>
+						<div class="col-sm-6">
+						  <input type="text" class="form-control" id="inputLat" readonly>
+						</div>
+					  </div>
+					  <div class="form-group row">
+						<label for="inputLon" class="col-sm-6 col-form-label text-right">Triangulated Lon: </label>
+						<div class="col-sm-6">
+						  <input type="text" class="form-control" id="inputLon" readonly>
+						</div>
+					  </div>
+				<!-- subform end-->
+				</div>
+		   </div>
+		 
+							
+		 
+		  <hr />
+		  <div class="form-group row">
+			<label for="inputTemperature" class="col-sm-6 col-form-label text-right">Temperature: </label>
+			<div class="col-sm-6">
+			  <input type="text" class="form-control" id="inputTemperature" readonly>
+			</div>
+		  </div>
+		  <div class="form-group row">
+			<label for="inputMoisture" class="col-sm-6 col-form-label  text-right">Humidity: </label>
+			<div class="col-sm-6">
+			  <input type="text" class="form-control" id="inputHumidity" readonly>
+			</div>
+		  </div>
+		  <div class="form-group row">
+			<label for="inputLight" class="col-sm-6 col-form-label  text-right">Light: </label>
+			<div class="col-sm-6">
+			  <input type="text" class="form-control" id="inputLight" readonly>
+			</div>
+		  </div>
+		
+		  
+		</div>
+
+    </div>
+    <div class="col-lg-2 col-xs-1">
+     <br>
+    </div>
+  </div>
+  <div>
+	
+	 <a class="weatherwidget-io" href="https://forecast7.com/en/42d7023d32/sofia/" data-label_1="SOFIA" data-label_2="WEATHER" data-theme="original" >SOFIA WEATHER</a>
+  </div>
+</div>
+
+</br>
+
+<script>
+!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+</script>
+
+<script  src="http://i4things.com/assets/i4t/js/i4things.js"> </script>
+
+
+
+<script>	
+/**********************************************************\
+				  Actual code here - make sure you have the 
+				  same key as in the IoT device
+\**********************************************************/
+
+
+var map;
+	
+function iot_json_function(data, key) {
+        var json_data = JSON.parse(data);
+		
+		 /**********************************************************\
+					Place your code here
+         \**********************************************************/
+		
+        var out = "Thing: " + json_data.thing + "<br>";
+       
+		  
+		  var decrypted_data = i4things_xxtea_decrypt(json_data.last[0].d, key);
+          
+		  var d  = new Date(json_data.last[0].t);
+		  var dateFormatted =  d.getDate()+'/'+(d.getMonth()+1)+'/'+ d.getFullYear() + ' ' + d.getHours() + ':' + d.getMinutes();
+		  
+		  $("#inputLastUpdated").val(dateFormatted);
+		  $("#inputSignalStrength").val(json_data.last[0].r);
+		  
+		  $("#inputLat").val(json_data.last[0].l);
+		  $("#inputLon").val(json_data.last[0].n);
+		  
+		  $("#inputTemperature").val( decrypted_data[0]);
+		  $("#inputHumidity").val( decrypted_data[1]);
+		  $("#inputLight").val( decrypted_data[2]==1?'On':'Off');
+          
+		  
+        
+			
+		if(typeof map === 'undefined')
+		{
+           map = new google.maps.Map(document.getElementById('googleMap'), {
+                zoom: 12,
+                center: new google.maps.LatLng(json_data.last[0].l, json_data.last[0].n),
+				gestureHandling: 'cooperative',
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+				controlSize: 20,
+            
+			});
+		   var marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(json_data.last[0].l, json_data.last[0].n),
+                        map: map
+                    });
+		}
+}
+
+</script>
+
+<script> 
+/**********************************************************\
+				  Can be called from event
+\**********************************************************/
+
+// make sure you register in www.i4things.com and get your own device ID - 
+// the key(private key) - is random bytes choose by you - they need to be the same here and in the device code
+// you also need to set the network key - which can be obtained when creating new node in the www.i4things.com client area
+// in node details
+
+var thing_id = 4;
+var thing_network_key = "A2B3A8E1FFB72FC2981366CC54A5A0CA";
+var thing_private_key = [0, 1, 2, 3, 4, 5, 6,7, 8, 9, 10, 11, 12, 13, 14, 15];
+var message_to_node;
+var refresh;		 
+// get last data
+		 function loadData(){
+		 
+         i4things_load_script("http://server.i4things.com:5408/iot_get_last/" + i4things_get_data_request(thing_id, thing_network_key) , function() {
+		 /**********************************************************\
+					The Server will return : var iot_json = '{....}';
+         \**********************************************************/
+			iot_json_function(iot_json, thing_private_key);
+		 });		 	 
+		}
+		
+		loadData();
+		refresh = window.setInterval(function(){
+			loadData();
+		}, 5000);
+
+		
+		function sendDoorOpen() {
+		  message_to_node = [1];
+	
+		
+         // send data to device		 
+         i4things_load_script("http://server.i4things.com:5408/iot_set/" + i4things_set_data_request(thing_id, message_to_node, thing_network_key, thing_private_key) , function() {
+		 /**********************************************************\
+					The Server will return : 
+					if ALL OK :
+					iot_json = '{ "RES" : "OK" }';
+					if ERROR :
+					var iot_json = '{ "ERR" : "message too big" }';
+					
+         \**********************************************************/	
+		 });
+		}
+		
+		function sendLightON() {
+		  message_to_node = [2];
+	
+		
+         // send data to device		 
+         i4things_load_script("http://server.i4things.com:5408/iot_set/" + i4things_set_data_request(thing_id, message_to_node, thing_network_key, thing_private_key) , function() {
+		 /**********************************************************\
+					The Server will return : 
+					if ALL OK :
+					iot_json = '{ "RES" : "OK" }';
+					if ERROR :
+					var iot_json = '{ "ERR" : "message too big" }';
+					
+         \**********************************************************/
+		 });
+		}	
+		function sendLightOFF() {
+		  message_to_node = [3];
+	
+		
+         // send data to device		 
+         i4things_load_script("http://server.i4things.com:5408/iot_set/" + i4things_set_data_request(thing_id, message_to_node, thing_network_key, thing_private_key) , function() {
+		 /**********************************************************\
+					The Server will return : 
+					if ALL OK :
+					iot_json = '{ "RES" : "OK" }';
+					if ERROR :
+					var iot_json = '{ "ERR" : "message too big" }';
+					
+         \**********************************************************/
+			
+		 });
+		}
+
+		$('#sendLightONButton').on('click', function (e) {
+
+			sendLightON();
+			fastRefreshMode();
+		});	
+		$('#sendLightOFFButton').on('click', function (e) {
+
+			sendLightOFF();
+			fastRefreshMode();
+		});	
+		$('#sendDoorOpenButton').on('click', function (e) {
+
+			sendDoorOpen();
+		});	
+		
+		function fastRefreshMode()
+		{
+			clearInterval(refresh);
+			var counter = 0;
+			
+			refresh = window.setInterval(
+				function()
+				{
+					if(counter++ == 10)
+					{
+						clearInterval(refresh);
+						
+						refresh = window.setInterval(function(){
+							loadData();
+						}, 5000);
+					}
+					else
+					{
+						loadData();
+					}
+					
+				}, 500);
+				
+		}
+
+</script>
+
+</body>
+</html>
