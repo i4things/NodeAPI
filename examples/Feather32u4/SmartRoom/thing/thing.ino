@@ -22,9 +22,12 @@
 // THING LIB
 
 #include "IoTThing.h"
-#include "thing_door.h"
+#include "thing_timestamp.h"
+#include "thing_door_lock.h"
+#include "thing_door_sensor.h"
 #include "thing_light.h"
 #include "thing_dht.h"
+
 
 //Feather32u2 Lora PINS
 #define CS_PIN 8
@@ -76,13 +79,13 @@ void received(uint8_t buf[], uint8_t size, int16_t rssi)
 // you also need to set the network key in the iot_get_send.html - which can be obtained when creating new node in the www.i4things.com client area
 // in node details
 
-#define thing_id 4
-uint8_t key[16] = {0, 1, 2, 3, 4, 5, 6,7, 8, 9, 10, 11, 12, 13, 14, 15};
+#define thing_id 18
+uint8_t key[16] = {77, 2, 3, 3, 41, 5, 6, 7, 88, 9, 10, 11, 12, 13, 114, 15};
 IoTThing thing(CS_PIN, INT_PIN, RST_PIN, key, thing_id, received);
 
 
 // 2 minutes
-#define MESSAGE_INTERVAL  120000
+#define MESSAGE_INTERVAL  20000
 uint32_t MESSAGE_LAST_SEND;
 
 
@@ -98,7 +101,10 @@ void setup()
 
   // Radio
   thing.init();
-
+ 
+  //Timestamp
+  TIMESTAMP_INIT();
+  
   //DHT (temp/Moist)
   DHT_INIT();
 
@@ -108,6 +114,9 @@ void setup()
   //Light
   LIGHT_INIT();
 
+   //Door Sensor
+  DOOR_SENSOR_INIT();
+
 }
 
 
@@ -116,9 +125,13 @@ void setup()
 
 void loop()
 {
+  TIMESTAMP_WORK();
+  
   DHT_WORK();
 
   DOOR_LOCK_WORK();
+
+  DOOR_SENSOR_WORK();
 
   LIGHT_WORK();
 
@@ -132,9 +145,15 @@ void loop()
     uint8_t msg[IoTThing_MAX_MESSAGE_LEN];
     uint8_t msg_size = 0;
 
-    msg[msg_size++] =  (int8_t)DHT_TEMP_GET();
-    msg[msg_size++] =  DHT_HUM_GET();
-    msg[msg_size++] =  IS_LIGHT_ON() ? 1 : 0;
+    msg[msg_size++] = (int8_t)DHT_TEMP_GET();
+    msg[msg_size++] = DHT_HUM_GET();
+    msg[msg_size++] = IS_LIGHT_ON() ? 1 : 0;
+    msg[msg_size++] = IS_DOOR_OPEN() ? 1 : 0;
+    
+
+    thing.add_uint(msg, msg_size, GET_DOOR_SENSOR_LAST_OPEN());
+
+    thing.add_uint(msg, msg_size, GET_DOOR_SENSOR_LAST_CLOSE());
 
 
     for (int i = 0; i < msg_size; i++)
@@ -155,7 +174,6 @@ void loop()
     }
     
     forceDataMessage = false;
-    
 
   }
 

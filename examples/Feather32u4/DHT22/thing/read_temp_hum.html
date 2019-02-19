@@ -48,6 +48,7 @@ function iot_json_function(data, key) {
 			{
 				out += "Temp: " +  decrypted_data[0] + "C<br>";
 			}
+			out += "Humidity: " +  decrypted_data[1] + "%<br>";
 		  }
 		  
 		  
@@ -89,7 +90,7 @@ function iot_json_hist_function(data, key) {
 				out += "Temp: " +  decrypted_data[0] + "C<br>";
 			}
 			
-			out += "Humidity: " +  decrypted_data[1] + "C<br>";
+			out += "Humidity: " +  decrypted_data[1] + "%<br>";
 		  }
 		  
           out += "<br>";
@@ -111,18 +112,18 @@ function iot_json_hist_function(data, key) {
 // you also need to set the network key - which can be obtained when creating new node in the www.i4things.com client area
 // in node details
 
-var thing_id = 4;
+var thing_id = 1;
 var thing_network_key = "015F43957CAECEFB0676290ADDF4A43D";
 var thing_private_key = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 var yesterday_idx = 0;
 		 
 // get todays data		 
-        // i4things_load_script("http://server.i4things.com:5408/iot_get/" + i4things_get_data_request(thing_id, thing_network_key) , function() {
+         i4things_load_script("http://server.i4things.com:5408/iot_get/" + i4things_get_data_request(thing_id, thing_network_key) , function() {
 		 /**********************************************************\
 					The Server will return : var iot_json = '{....}';
          \**********************************************************/
-		//	iot_json_function(iot_json, thing_private_key);
-		// });
+			iot_json_function(iot_json, thing_private_key);
+		 });
 
 // get hostory data for yesterday - index 0
          i4things_load_script("http://server.i4things.com:5408/iot_get_hist/" + i4things_get_data_hist_request(thing_id, yesterday_idx, thing_network_key) , function() {

@@ -333,7 +333,7 @@ class IoTThing
       };
 
       uint32_t  dis_ = (uint32_t)round((value_ - min_) / dev_);
-      memcpy((void *)buf_[pos_], (void *) &dis_, container_size_);
+      memcpy((void *)&buf_[pos_], (void *) &dis_, container_size_);
       pos_ += container_size_;
     }
 
@@ -358,7 +358,7 @@ class IoTThing
       };
 
       uint32_t c = 0;
-      memcpy((void *) &c, (void *)buf_[pos_], container_size_);
+      memcpy((void *) &c, (void *) &buf_[pos_], container_size_);
       pos_ += container_size_;
       return (min_ + (((double)c)  * dev_));
     }
@@ -1061,5 +1061,3 @@ class IoTThing
 };
 
 #pragma pop_macro("LOG64_ENABLED")
-
-

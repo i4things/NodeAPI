@@ -37,7 +37,7 @@ void received(uint8_t buf[], uint8_t size, int16_t rssi) {
 // you also need to set the network key in the iot_get_send.html - which can be obtained when creating new node in the www.i4things.com client area
 // in node details
 
-#define thing_id 4
+#define thing_id 1
 uint8_t key[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 IoTThing thing(CS_PIN, INT_PIN, RST_PIN, key, thing_id, received);
 
@@ -52,7 +52,7 @@ void setup() {
 
   // init serial
   Serial.begin(115200);
-  // Initial delay to give chance to the com port to cennect
+   // Initial delay to give chance to the com port to cennect
   delay(2000);
   // thing init
   thing.init();
