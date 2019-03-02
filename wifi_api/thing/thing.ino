@@ -13,12 +13,6 @@
 */
 
 
-///////////////////////////////////////////////////////////////////////////////////
-// LOG constants
-#define LOG64_ENABLED
-
-#include <Log64.h>
-
 
 // called when packet received from node
 void received(uint8_t buf[], uint8_t size, int16_t rssi) {

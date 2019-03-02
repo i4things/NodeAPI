@@ -16,13 +16,13 @@
 //{
 //  public:
 //    // constructor
-//  IoTThing(const char * ssid_,
-//           const char * pass_,
-//           uint8_t key_[16],
-//           uint64_t id_,
-//           uint64_t gateway_id_,
-//           uint8_t gateway_key_[16]
-//           void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL)
+//    IoTThing(const char * ssid_,
+//             const char * pass_,
+//             uint64_t id_,
+//             uint8_t key_[16],
+//             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL,
+//             uint64_t gateway_id_ = IoTThing_DEFAULT_ID,
+//             const char * gateway_key_ = IoTThing_DEFAULT_KEY)
 //
 //    // call before using
 //    void init();
