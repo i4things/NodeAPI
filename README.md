@@ -1,4 +1,7 @@
 # NodeAPI
+
+*THE API ALSO HAS A WIFI VERSION WITH THE SAME DEFINITIONS AND FUNCTIONALITY IN CASE YOU WANT TO BENEFIT DIRECTLY FROM ESP31 BOARD WIFI WITHOUT USING LoRa GATEWAY
+
 Node/Device/Thing  Data Send/Receive API 
 
 On the node/thing side i4things provide one simple straight forward class that can be used to deliver data to the authority/server.
