@@ -16,7 +16,13 @@
 // WIFI
 
 
+#if defined (ESP32)
 #include <WiFi.h>
+#endif
+
+#if defined (ESP8266)
+#include <ESP8266WiFi.h>
+#endif
 
 #pragma push_macro("LOG64_ENABLED")
 //#undef LOG64_ENABLED
