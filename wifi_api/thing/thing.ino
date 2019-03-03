@@ -13,7 +13,6 @@
 */
 
 
-
 // called when packet received from node
 void received(uint8_t buf[], uint8_t size, int16_t rssi) {
   Serial.println("Data Received :");
@@ -32,18 +31,16 @@ void received(uint8_t buf[], uint8_t size, int16_t rssi) {
 // you also need to set the network key in the iot_get_send.html - which can be obtained when creating new node in the www.i4things.com client area
 // in node details
 
-//you can use the default gateway for wifi API - or if you want to monitor your own heartbeats and have GPS location please create your own gateway and set it here
-//#define gateway_id 4172
-//#define gateway_key "6869376AF0D54449C1C22ED5BBA2A18F"
+//please create a gateway for every per node and set it here
+#define gateway_id 4172
+#define gateway_key "6869376AF0D54449C1C22ED5BBA2A18F"
 
 #define ssid  "PLUSNET-7F63NX"
 #define pass "4e3acd6a4f"
 
 #define thing_id 37
 uint8_t thing_key[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-IoTThing thing(ssid, pass, thing_id, thing_key, received);
-//you can use the default gateway for wifi API - or if you want to monitor your own heartbeats and have GPS location please create your own gateway and set it here
-//IoTThing thing(ssid, pass, thing_id, thing_key, received, gateway_id, gateway_key );
+IoTThing thing(ssid, pass, thing_id, thing_key, gateway_id, gateway_key, received);
 
 
 // 2 minutes

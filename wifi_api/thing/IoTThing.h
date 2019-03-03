@@ -20,9 +20,10 @@
 //             const char * pass_,
 //             uint64_t id_,
 //             uint8_t key_[16],
-//             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL,
-//             uint64_t gateway_id_ = IoTThing_DEFAULT_ID,
-//             const char * gateway_key_ = IoTThing_DEFAULT_KEY)
+//            uint64_t gateway_id_,
+//             const char * gateway_key_,
+//             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL
+//            )
 //
 //    // call before using
 //    void init();
@@ -115,8 +116,6 @@
 #define IoTThing_MAX_ACK_TIMEOUT 5000
 #define IoTThing_MAGIC 8606
 #define IoTThing_OPEN_GATEWAY_ID 10
-#define IoTThing_DEFAULT_ID 4172
-#define IoTThing_DEFAULT_KEY "6869376AF0D54449C1C22ED5BBA2A18F"
 
 class IoTThing : public IoTGatewayCallback
 {
@@ -126,9 +125,9 @@ class IoTThing : public IoTGatewayCallback
              const char * pass_,
              uint64_t id_,
              uint8_t key_[16],
-             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL,
-             uint64_t gateway_id_ = IoTThing_DEFAULT_ID,
-             const char * gateway_key_ = IoTThing_DEFAULT_KEY) :
+             uint64_t gateway_id_,
+             const char * gateway_key_,
+             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL ) :
       id(id_),
       ack_callback(NULL),
       timeout_callback(NULL),
