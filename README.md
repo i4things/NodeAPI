@@ -2,6 +2,8 @@
 
 *THE API ALSO HAS A WIFI VERSION WITH THE SAME DEFINITIONS AND FUNCTIONALITY IN CASE YOU WANT TO BENEFIT DIRECTLY FROM ESP32 OR ESP8266 BOARD WIFI WITHOUT USING LoRa GATEWAY
 
+**ULP (Ultra Low Power) EXAMPLES ALSO AVAILABLE FOR WIFI API AND LORA API in examples/ESP32/ULP 
+
 Node/Device/Thing  Data Send/Receive API 
 
 On the node/thing side i4things provide one simple straight forward class that can be used to deliver data to the authority/server.
