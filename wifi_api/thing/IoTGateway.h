@@ -24,10 +24,15 @@
 #define IoTGateway_HEARTBEAT_TIMEOUT 60000
 #define IoTGateway_HEARTBEAT_MAX_MESSAGE_LEN 16
 #define IoTGateway_OPER_HEARTBEAT_IOT 127
+#define IoTGateway_WAITING_NA 0
+#define IoTGateway_WAITING_SENT 1
+#define IoTGateway_WAITING_CONFIRM 2
+
 class IoTGatewayCallback
 {
   public :
     virtual void received(uint8_t buf_[], uint8_t size_) = 0;
+    virtual void data_sent_successfully() = 0;
 };
 
 class IoTGateway : public IoTGatewayWifiCallback
@@ -43,6 +48,7 @@ class IoTGateway : public IoTGatewayWifiCallback
       gateway_id(gateway_id_),
       gateway_seq(IoTGateway_SEQ_COUNTER_MIN),
       heartbeat_last(IoTGateway_HEARTBEAT_TIMEOUT),
+      waiting_type(IoTGateway_WAITING_NA),
       oper_magic_counter(0)
     {
 
@@ -97,6 +103,23 @@ class IoTGateway : public IoTGatewayWifiCallback
       buf_[start_index_] = crc(&buf_[start_index_], ((uint16_t)(start_index_ + size_)) , start_index_ + 1);
 
       receive_callback->received(&buf_[start_index_], size_);
+    }
+
+    virtual void data_sent(uint16_t size_)
+    {
+      if (waiting_type == IoTGateway_WAITING_SENT)
+      {  
+         waiting_type = IoTGateway_WAITING_CONFIRM;
+      }
+    }
+    
+    virtual void server_time(uint32_t time_)
+    {
+      if (waiting_type == IoTGateway_WAITING_CONFIRM)
+      {  
+         waiting_type = IoTGateway_WAITING_NA;
+         receive_callback->data_sent_successfully();
+      }
     }
 
   private:
@@ -229,6 +252,8 @@ class IoTGateway : public IoTGatewayWifiCallback
       gen_internet_message(buf_wifi, size_wifi, buf_, size_);
 
       wifi->send(buf_wifi, size_wifi);
+
+      waiting_type = IoTGateway_WAITING_SENT;
     }
 
     // please call in the main loop to be able to dispatch data and menage logic
@@ -279,6 +304,8 @@ class IoTGateway : public IoTGatewayWifiCallback
 
     IoTGatewayCallback * receive_callback;
 
+    uint8_t waiting_type;
+    
     uint8_t gateway_seq;
 
     uint32_t heartbeat_last;
@@ -393,25 +420,3 @@ class IoTGateway : public IoTGatewayWifiCallback
 };
 
 #pragma pop_macro("LOG64_ENABLED")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

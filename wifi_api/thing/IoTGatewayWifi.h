@@ -44,6 +44,8 @@ class IoTGatewayWifiCallback
 {
   public :
     virtual void received(uint8_t buf_[], uint8_t start_index_, uint8_t size_) = 0;
+    virtual void data_sent(uint16_t size_) = 0;
+    virtual void server_time(uint32_t time_) = 0;
 };
 
 class IoTGatewayWifi
@@ -259,6 +261,7 @@ class IoTGatewayWifi
             LOG64_SET("]");
             LOG64_NEW_LINE;
 #endif
+           receive_callback->server_time(server_time);
           }
           else
           {
@@ -479,6 +482,7 @@ class IoTGatewayWifi
                 LOG64_SET("] WAITING SYNC");
                 LOG64_NEW_LINE;
 #endif
+                receive_callback->data_sent(queue_buf_size);
               }
 
               // clean buff

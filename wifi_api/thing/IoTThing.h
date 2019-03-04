@@ -110,12 +110,12 @@
 
 #define IoTThing_MIN_RSSI  (-150)
 #define IoTThing_MAX_MESSAGE_LEN 31
-#define IoTThing_ACK_MESSAGE_LEN 7
 #define IoTThing_MESSAGE_TIMEOUT 60000
-#define IoTThing_ACK_TIMEOUT 400
-#define IoTThing_MAX_ACK_TIMEOUT 5000
 #define IoTThing_MAGIC 8606
 #define IoTThing_OPEN_GATEWAY_ID 10
+#define IoTThing_WAIT_NA 0
+#define IoTThing_WAIT_ACK 1
+#define IoTThing_WAIT_TIMEOUT 2
 
 class IoTThing : public IoTGatewayCallback
 {
@@ -131,6 +131,7 @@ class IoTThing : public IoTGatewayCallback
       id(id_),
       ack_callback(NULL),
       timeout_callback(NULL),
+      wait_ack(IoTThing_WAIT_NA),
       receive_callback(receive_callback_),
       gateway_id(gateway_id_)
     {
@@ -143,8 +144,7 @@ class IoTThing : public IoTGatewayCallback
     void init()
     {
       gateway->init();
-      
-      timeout = false;
+
       total = 0;
       total_ack = 0;
       total_recv = 0;
@@ -354,7 +354,8 @@ class IoTThing : public IoTGatewayCallback
       memcpy(buf, raw , pos_);
       buf_size = pos_;
       q = buf;
-      timeout = false;
+      wait_ack = IoTThing_WAIT_ACK;
+      wait_ack_start = millis();
 
       return true;
     }
@@ -362,28 +363,21 @@ class IoTThing : public IoTGatewayCallback
     // return true - if all previouse tasks has been completed and ready to accept new data
     bool is_ready()
     {
-      return (q == NULL);
+      return (q == NULL) && ((wait_ack == IoTThing_WAIT_NA) || (wait_ack == IoTThing_WAIT_TIMEOUT));
     }
 
     // return true - if last message sending has hit timeout and failed
     bool timeout_hit()
     {
-      return timeout;
+      return (wait_ack == IoTThing_WAIT_TIMEOUT);
     }
 
     // call if you want to stop retry's to send the message
     void cancel()
     {
-      if (q != NULL)
+      if (wait_ack == IoTThing_WAIT_ACK)
       {
-        timeout = true;
-        if ((++seq) > 126)
-        {
-          seq = 1; // as * -1 is used for ack
-        }
-        q = NULL;
-        buf_size = 0;
-
+        wait_ack = IoTThing_WAIT_TIMEOUT;
 #if defined (LOG64_ENABLED)
         LOG64_SET(F("IoTT: MESSAGE CANCELED"));
         LOG64_NEW_LINE;
@@ -424,30 +418,47 @@ class IoTThing : public IoTGatewayCallback
       }
     }
 
+    virtual void data_sent_successfully()
+    {
+      wait_ack = IoTThing_WAIT_NA;
+      // ack
+      total_ack++;
+      if (ack_callback != NULL)
+      {
+
+        int16_t rssi_ = (IoTThing_MIN_RSSI / 100) * ((int16_t)gateway->signal_strength());
+        ack_callback(rssi_);
+      }
+    }
+
     // please call in the main loop to be able to dispatch data and menage logic
     void work()
     {
       gateway->work();
+
+      if (wait_ack == IoTThing_WAIT_ACK)
+      {
+        if ((wait_ack == IoTThing_WAIT_ACK) && (((uint32_t)(((uint32_t)millis()) - wait_ack_start)) >= IoTThing_MESSAGE_TIMEOUT))
+        {
+          wait_ack == IoTThing_WAIT_TIMEOUT;
+          if (timeout_callback != NULL)
+          {
+            timeout_callback(IoTThing_MESSAGE_TIMEOUT);
+          }
+          cancel();
+        }
+      }
 
       if (q != NULL)
       {
         gateway->send(buf, buf_size);
         total++;
         q = NULL;
-
-        // ack
-        total_ack++;
         if ((++seq) > 126)
         {
           seq = 1; // as * -1 is used for ack
         }
         buf_size = 0;
-
-        if (ack_callback != NULL)
-        {
-          int16_t rssi_ = (IoTThing_MIN_RSSI / 100) * ((int16_t)gateway->signal_strength());
-          ack_callback(rssi_);
-        }
       }
     };
 
@@ -549,7 +560,6 @@ class IoTThing : public IoTGatewayCallback
     uint32_t total_recv;
     uint32_t total_retransmit;
 
-    bool timeout;
     uint8_t resetPin;
 
     uint8_t key[16];
@@ -559,6 +569,9 @@ class IoTThing : public IoTGatewayCallback
     void (* timeout_callback)(uint16_t timeout_);
 
     uint64_t gateway_id;
+
+    uint8_t wait_ack;
+    uint32_t wait_ack_start;
 
     void (* receive_callback)(uint8_t buf_[], uint8_t size_, int16_t rssi_);
 
@@ -738,5 +751,3 @@ class IoTThing : public IoTGatewayCallback
 };
 
 #pragma pop_macro("LOG64_ENABLED")
-
-
