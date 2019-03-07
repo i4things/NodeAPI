@@ -392,7 +392,7 @@ class IoTThing : public IoTGatewayCallback
       total_recv++;
       if (receive_callback != NULL)
       {
-        int16_t rssi_ = (IoTThing_MIN_RSSI / 100) * ((int16_t)gateway->signal_strength());
+        int16_t rssi_ = (IoTGateway_MIN_RSSI  * (100 - ((int16_t)gateway->signal_strength()))) / 100;
         //crc
         //seq
         uint8_t sz = 2;
@@ -426,7 +426,7 @@ class IoTThing : public IoTGatewayCallback
       if (ack_callback != NULL)
       {
 
-        int16_t rssi_ = (IoTThing_MIN_RSSI / 100) * ((int16_t)gateway->signal_strength());
+        int16_t rssi_ = (IoTGateway_MIN_RSSI  * (100 - ((int16_t)gateway->signal_strength()))) / 100;
         ack_callback(rssi_);
       }
     }
