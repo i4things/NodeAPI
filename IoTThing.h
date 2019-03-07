@@ -866,7 +866,7 @@ class IoTThing
     uint8_t resetPin;
     uint32_t last;
 
-    uint8_t key[16];
+    uint8_t __attribute__ ((aligned (4))) key[16];
     uint64_t id;
 
     RH_RF95_IoTThing driver;
