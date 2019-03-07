@@ -202,7 +202,7 @@ class IoTGateway : public IoTGatewayWifiCallback
       enc =  xxtea_encrypt(out_buf_, in_size_ + 4, gateway_key,  &enc_size);
 
 
-      int16_t rssi_ = (IoTGateway_MIN_RSSI / 100) * ((int16_t)wifi->signal_strength());
+      int16_t rssi_ = (IoTGateway_MIN_RSSI  * (100 - ((int16_t)wifi->signal_strength()))) / 100;
 
       uint16_t magic = 86;
       magic = magic << 8;
