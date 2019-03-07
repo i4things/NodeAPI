@@ -311,7 +311,7 @@ class IoTGateway : public IoTGatewayWifiCallback
     uint32_t heartbeat_last;
     uint8_t oper_magic_counter;
 
-    uint8_t gateway_key[16];
+    uint8_t __attribute__ ((aligned (4))) gateway_key[16];
     uint64_t gateway_id;
 
     IoTGatewayWifi *  wifi;

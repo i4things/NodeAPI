@@ -562,7 +562,7 @@ class IoTThing : public IoTGatewayCallback
 
     uint8_t resetPin;
 
-    uint8_t key[16];
+    uint8_t __attribute__ ((aligned (4))) key[16];
     uint64_t id;
 
     void (* ack_callback)(int16_t rssi_);
