@@ -33,7 +33,7 @@ Arduinoo IDE Bor Settings:
  Get Board Info 
  
  Sonoff Basivc:
- ![Cat](https://raw.githubusercontent.com//i4things/NodeAPI/edit/master/examples/ESP8266-01/1CH_RELAY/thing/assets/Sonoff_ESP8266.jpg)
+ ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266.jpg)
 <IMAGE: Sonoff_ESP8266.jpg>
 Note: newer version of the Sonoff module consist of five pins below the button. Follow the image above and ignore the pin furthest to the Button.
 
