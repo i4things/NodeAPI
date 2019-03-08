@@ -14,22 +14,39 @@ Most of the USB adapters will rrequire to installl theh following driver :  http
 Arduinoo IDE Bor Settings:
 
  Board: "Generic ESP8266 Module" 
+ 
  Upload Speed: "115200"
+ 
  Upload Using: "Serial" 
- CPU Frequency: "80 MHz' 
- Crystal Frequency: @26 MHz' 
+ 
+ CPU Frequency: "80 MHz" 
+ 
+ Crystal Frequency: @26 MHz"
+ 
  Flash Size: "IM (no SPIFFS)" 
+ 
  Flash Mode: "DOUT" 
+ 
  Flash Frequency: "40MHz" 
+ 
  Reset Method: "ck" 
+ 
  Debug port: "Disabled" 
+ 
  Debug Level: "None" 
+ 
  IwIP Variant: "v2 Lower Memoyy" 
+ 
  VTables: "Flash" 
+ 
  Exceptions: "Disabled" 
+ 
  Builtin Led: "2" 
+ 
  Erase Flash: "Only Sketch" 
+ 
  Port: "COM9" 
+ 
  Get Board Info 
  
  Sonoff Basic:
