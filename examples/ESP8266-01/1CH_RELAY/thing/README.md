@@ -5,9 +5,8 @@ Install ESP8266 board software:
 Open Arduino IDE and select File ? Preferences (Arduino ? Preferences on Mac) and add the following text for field Additional Boards Manager URLs: http://arduino.esp8266.com/stable/package_esp8266com_index.json and select OK.
 Open Tools ? Boards... ? Boards Manager... and scroll down and click on esp8266 by ESP8266 Community. Click the Install button to download and install the latest ESP8266 board software. Select Close.
 
-Upload Sketch:
-Easest way is to use "CH340 USB to ESP8266 Serial ESP-01" adapter  with on-board toggle switch between UART side for serial TTL debugging and PROG for firmware programming
-/ you can also can use any USB to TTL adapter - pllenty of instructions online how to upload from Arduino IDE to ESP8266-01 board/
+Upload Sketch: 
+Easiest way is to use "CH340 USB to ESP8266 Serial ESP-01" adapter with on-board toggle switch between UART side for serial TTL debugging and PROG for firmware programming / you can also can use any USB to TTL adapter - plenty of instructions online how to upload from Arduino IDE to ESP8266-01 board/
 
 USB Driver :
 Most of the USB adapters will rrequire to installl theh following driver :  https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers
