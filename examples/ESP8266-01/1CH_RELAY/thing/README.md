@@ -68,3 +68,10 @@ Dual GPIO0 grounded Programming the Sonoff Dual is also more difficult as the bu
 I suggest to solder a 4 pin header for the serial interface as shown in the image on the right (the vertical connector) and use the small inter layer VIA to ground GPIO0 using the GND pin from the button 0 and button 1 header.
 
 The 4 pin header in the middle, which is normally not present, is not needed but might be used in programming the ESP8266 as there must be a better way to get the initial code loaded ...
+
+S20 Smart Socket
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_Socket_ESP8266.jpg)
+
+The picture on the right, shows how to program the S20 Smart Socket powered by the FTDI USB converter.
+Remember that during programming the Smart Socket is NOT connected to mains.
