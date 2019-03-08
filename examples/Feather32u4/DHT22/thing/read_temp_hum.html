@@ -40,9 +40,9 @@ function iot_json_function(data, key) {
 		  if (decrypted_data.length > 1)
 		  {
 		    // convert temo to signed one byte number
-			if (decrypted_data[j] > 127)
+			if (decrypted_data[0] > 127)
 			{
-				out += "Temp: " +  (decrypted_data[0] - 254) + "C<br>";
+				out += "Temp: " +  (decrypted_data[0] - 256) + "C<br>";
 			}
 			else
 			{
@@ -81,9 +81,9 @@ function iot_json_hist_function(data, key) {
 		  if (decrypted_data.length > 1)
 		  {
 		    // convert temo to signed one byte number
-			if (decrypted_data[j] > 127)
+			if (decrypted_data[0] > 127)
 			{
-				out += "Temp: " +  (decrypted_data[0] - 254) + "C<br>";
+				out += "Temp: " +  (decrypted_data[0] - 256) + "C<br>";
 			}
 			else
 			{
