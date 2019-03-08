@@ -49,6 +49,8 @@ Arduinoo IDE Bor Settings:
  
  Get Board Info 
  
+ 
+ 
  Sonoff Basic:
  
  ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266.jpg)
