@@ -32,16 +32,19 @@ Arduinoo IDE Bor Settings:
  Port: "COM9" 
  Get Board Info 
  
- Sonoff Basivc:
+ Sonoff Basic:
+ 
  ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266.jpg)
-<IMAGE: Sonoff_ESP8266.jpg>
+
 Note: newer version of the Sonoff module consist of five pins below the button. Follow the image above and ignore the pin furthest to the Button.
 
 Do not connect AC power during the flash cable connection.
 
 
 Sonoff Dual:
-<IMAGE: Sonoff_Dual_ESP8266.jpgg>
+
+ ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_Dual_ESP8266.jpg)
+ 
 Dual GPIO0 grounded Programming the Sonoff Dual is also more difficult as the button is not connected to GPIO0 which is needed to put the ESP8266 in programming mode during power up.
 I suggest to solder a 4 pin header for the serial interface as shown in the image on the right (the vertical connector) and use the small inter layer VIA to ground GPIO0 using the GND pin from the button 0 and button 1 header.
 
