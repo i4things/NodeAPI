@@ -112,7 +112,7 @@ void setup()
 {
 #if defined(LCH)
   // init serial
-  Serial.begin(115200);
+  Serial.begin(9600);
   // Initial delay to give chance to the com port to connect
   delay(2000);
 #endif
