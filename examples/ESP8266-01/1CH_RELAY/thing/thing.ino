@@ -12,15 +12,28 @@
    DERIVED FROM THIS SOURCE CODE FILE.
 */
 
+// FOR LCH RELAY MODULE
+//#define LCH
+
+// FOR SONOFF
+#define SONOFF
+
+uint8_t RELAY1_STATE; // 0-OFF  1-ON
+
+#if defined(LCH)
 //ESP8266-01 1 CHANNEL RELAYY
 // relay,0,1 = A0 01 01 A2
 // relay,0,0 = A0 01 00 A1
 #define RELEAY_COMMAND_SIZE 4
 
-uint8_t RELAY1_STATE; // 0-OFF  1-ON
 uint8_t RELAY1_ON[RELEAY_COMMAND_SIZE] =  { 0xA0, 0x01, 0x01, 0xA2};
 uint8_t RELAY1_OFF[RELEAY_COMMAND_SIZE] = { 0xA0, 0x01, 0x00, 0xA1};
+#endif
 
+#if defined(SONOFF)
+#define RELAY_PIN 12
+#define LED_PIN 13
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////
 // THING LIB
@@ -47,10 +60,16 @@ void received(uint8_t buf[], uint8_t size, int16_t rssi)
         {
           // OFF
           RELAY1_STATE = 0;
+#if defined(LCH)
           for (uint8_t i = 0; i < RELEAY_COMMAND_SIZE; i++)
           {
             Serial.write(RELAY1_OFF[i]);
           }
+#endif
+#if defined(SONOFF)
+          digitalWrite(RELAY_PIN, LOW);
+          digitalWrite(LED_PIN, HIGH);
+#endif
           FORCE_DATA_MESSAGE = true;
           break;
         }
@@ -58,10 +77,16 @@ void received(uint8_t buf[], uint8_t size, int16_t rssi)
         {
           // ON
           RELAY1_STATE = 1;
+#if defined(LCH)
           for (uint8_t i = 0; i < RELEAY_COMMAND_SIZE; i++)
           {
             Serial.write(RELAY1_ON[i]);
           }
+#endif
+#if defined(SONOFF)
+          digitalWrite(RELAY_PIN, HIGH);
+          digitalWrite(LED_PIN, LOW);
+#endif
           FORCE_DATA_MESSAGE = true;
           break;
         }
@@ -79,16 +104,26 @@ void received(uint8_t buf[], uint8_t size, int16_t rssi)
 
 #define thing_id 37
 
-uint8_t thing_key[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+  uint8_t thing_key[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 IoTThing thing(ssid, pass, thing_id, thing_key, gateway_id, gateway_key, received);
 
 
 void setup()
 {
+#if defined(LCH)
   // init serial
-  Serial.begin(9600);
+  Serial.begin(115200);
   // Initial delay to give chance to the com port to connect
   delay(2000);
+#endif
+
+#if defined(SONOFF)
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW);
+
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
+#endif
   // init request to send data messsage
   FORCE_DATA_MESSAGE = true;
   // initt state

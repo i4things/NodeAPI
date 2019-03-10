@@ -50,12 +50,18 @@ Arduinoo IDE Bor Settings:
  Get Board Info 
  
  
+ Switch the code between LCH Relay Modulle and Sonooff
+
+for LCH uncomment #define LCH and comment out the SONOFF 
+for SONOFF uncomment #define SONOFF and comment out the LCH  
  
  Sonoff Basic:
  
  ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266.jpg)
 
 Note: newer version of the Sonoff module consist of five pins below the button. Follow the image above and ignore the pin furthest to the Button.
+
+To upload keep the button pressed while connecting to the USB to TTLL moduule
 
 Do not connect AC power during the flash cable connection.
 
