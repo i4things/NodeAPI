@@ -33,6 +33,10 @@ uint8_t RELAY1_OFF[RELEAY_COMMAND_SIZE] = { 0xA0, 0x01, 0x00, 0xA1};
 #if defined(SONOFF)
 #define RELAY_PIN 12
 #define LED_PIN 13
+#define BUTTON_PIN 0
+uint8_t BUTTON_DOWN; // 0 - UP , 1 - DOWN
+#define BUTTON_TIMEOUT  100
+uint32_t BUTTON_LAST_EXECUTE;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +108,7 @@ void received(uint8_t buf[], uint8_t size, int16_t rssi)
 
 #define thing_id 37
 
-  uint8_t thing_key[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+uint8_t thing_key[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 IoTThing thing(ssid, pass, thing_id, thing_key, gateway_id, gateway_key, received);
 
 
@@ -123,6 +127,10 @@ void setup()
 
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
+
+  pinMode(BUTTON_PIN, INPUT);
+  BUTTON_LAST_EXECUTE = millis();
+  BUTTON_DOWN = 0;
 #endif
   // init request to send data messsage
   FORCE_DATA_MESSAGE = true;
@@ -138,6 +146,39 @@ void setup()
 
 void loop()
 {
+#if defined(SONOFF)
+  //deal with the button ( as a manual switch)
+  if (((uint32_t)(((uint32_t)millis()) - BUTTON_LAST_EXECUTE)) >= BUTTON_TIMEOUT)
+  {
+    BUTTON_LAST_EXECUTE = millis();
+    if (digitalRead(BUTTON_PIN) == LOW)
+    {
+      BUTTON_DOWN = 1;
+    }
+    else
+    {
+      if (BUTTON_DOWN == 1)
+      {
+        // button released toggle relay
+        if (RELAY1_STATE == 1)
+        {
+          RELAY1_STATE = 0;
+          digitalWrite(RELAY_PIN, LOW);
+          digitalWrite(LED_PIN, HIGH);
+        }
+        else
+        {
+          RELAY1_STATE = 1;
+          digitalWrite(RELAY_PIN, HIGH);
+          digitalWrite(LED_PIN, LOW);
+        }
+        FORCE_DATA_MESSAGE = true;
+      }
+      BUTTON_DOWN = 0;
+    }
+  }
+#endif
+
   // check if send message is required
   if (FORCE_DATA_MESSAGE)
   {
