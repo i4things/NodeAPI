@@ -238,7 +238,7 @@ class IoTGateway : public IoTGatewayWifiCallback
     // return signal strength in %
     uint8_t signal_strength()
     {
-      wifi->signal_strength();
+      return wifi->signal_strength();
     }
 
 

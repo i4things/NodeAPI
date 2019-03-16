@@ -207,7 +207,7 @@ class IoTThing : public IoTGatewayCallback
     // return signal strength in %
     uint8_t signal_strength()
     {
-      gateway->signal_strength();
+      return gateway->signal_strength();
     }
 
 
