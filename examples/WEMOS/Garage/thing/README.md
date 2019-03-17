@@ -5,6 +5,7 @@ Install ESP8266 board software:
 Open Arduino IDE and select File ? Preferences (Arduino ? Preferences on Mac) and add the following text for field Additional Boards Manager URLs: http://arduino.esp8266.com/stable/package_esp8266com_index.json and select OK.
 Open Tools ? Boards... ? Boards Manager... and scroll down and click on esp8266 by ESP8266 Community. Click the Install button to download and install the latest ESP8266 board software. Select Close.
 
+Dependacy on ( the following lib need to be isntalled) : https://github.com/i4things/Gateway/blob/master/src/arduino-esp32/DHTesp.zip
 
 Use Board: "WeMos D1 R1" 
 
