@@ -1,0 +1,63 @@
+/**
+   USE OF THIS SOFTWARE IS GOVERNED BY THE TERMS AND CONDITIONS
+   OF THE LICENSE STATEMENT AND LIMITED WARRANTY FURNISHED WITH
+   THE PRODUCT.
+   <p/>
+   IN PARTICULAR, YOU WILL INDEMNIFY AND HOLD B2N LTD., ITS
+   RELATED COMPANIES AND ITS SUPPLIERS, HARMLESS FROM AND AGAINST ANY
+   CLAIMS OR LIABILITIES ARISING OUT OF THE USE, REPRODUCTION, OR
+   DISTRIBUTION OF YOUR PROGRAMS, INCLUDING ANY CLAIMS OR LIABILITIES
+   ARISING OUT OF OR RESULTING FROM THE USE, MODIFICATION, OR
+   DISTRIBUTION OF PROGRAMS OR FILES CREATED FROM, BASED ON, AND/OR
+   DERIVED FROM THIS SOURCE CODE FILE.
+*/
+
+// LED blinking
+//
+
+#define LED_TIMEOUT_NOT_CONNECTED  100
+#define LED_TIMEOUT_CONNECTED  2000
+uint32_t LED_TIMEOUT;
+uint32_t LED_LAST_EXECUTE;
+// 0 OFF, 1- ON
+uint8_t LED_STATE;
+
+inline void LED_init()
+{
+  pinMode(BUILTIN_LED, OUTPUT);
+  LED_LAST_EXECUTE = millis();
+  LED_STATE = 0;
+  LED_TIMEOUT = LED_TIMEOUT_NOT_CONNECTED;
+}
+
+// keep boolean return to keep pattern( not used in reality)
+inline bool LED_work()
+{
+  if (((uint32_t)(((uint32_t)millis()) - LED_LAST_EXECUTE)) >= LED_TIMEOUT)
+  {
+    
+    LED_LAST_EXECUTE = millis();
+
+    if (thing.signal_strength() > 0)
+    {
+      LED_TIMEOUT = LED_TIMEOUT_CONNECTED;
+    }
+    else
+    {
+      LED_TIMEOUT = LED_TIMEOUT_NOT_CONNECTED;
+    }
+    
+    if (LED_STATE == 1)
+    {
+       LED_STATE = 0;
+       digitalWrite(BUILTIN_LED, LOW);
+    }
+    else
+    {
+      LED_STATE = 1;
+      digitalWrite(BUILTIN_LED, HIGH);
+    }
+  }
+
+  return false;
+}
