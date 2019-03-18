@@ -58,6 +58,13 @@ for SONOFF uncomment #define SONOFF and comment out the LCH
  Sonoff Basic:
  
  ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266.jpg)
+ 
+ ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_PCB.jpg)
+ 
+ ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_CH340G_1.jpg)
+ 
+  ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_CH340G_2.jpg)
+ 
 
 Note: newer version of the Sonoff module consist of five pins below the button. Follow the image above and ignore the pin furthest to the Button.
 
@@ -72,6 +79,7 @@ To upload :
 4. Insert the FTDI converter USB in your computer (while holding the push button).
 
 5. After 2–3 seconds, release the push button.
+
 
 Do not connect AC power during the flash cable connection.
 
@@ -91,3 +99,33 @@ S20 Smart Socket
 
 The picture on the right, shows how to program the S20 Smart Socket powered by the FTDI USB converter.
 Remember that during programming the Smart Socket is NOT connected to mains.
+
+S26 Smart Socket
+
+The s26 is quite challenging - following is a  step by step picture based instructions
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_1.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_2.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_3.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_4.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_5.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_6.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_7.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_8.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_9.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_10.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_11.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_12.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_13.jpg)
