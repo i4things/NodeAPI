@@ -54,6 +54,23 @@ Arduinoo IDE Bor Settings:
 
 for LCH uncomment #define LCH and comment out the SONOFF 
 for SONOFF uncomment #define SONOFF and comment out the LCH  
+
+ For All Sunoff Modules :
+  
+  To upload :
+
+1. Do not plug into the USB on your computer.
+
+2. Do not connect the Sonoff to mains power.
+
+3. Press and hold the push button on the Sonoff board.
+
+4. Insert the FTDI converter USB in your computer (while holding the push button).
+
+5. After 2–3 seconds, release the push button.
+
+
+Do not connect AC power during the flash cable connection.
  
  Sonoff Basic:
  
@@ -68,20 +85,6 @@ for SONOFF uncomment #define SONOFF and comment out the LCH
 
 Note: newer version of the Sonoff module consist of five pins below the button. Follow the image above and ignore the pin furthest to the Button.
 
-To upload :
-
-1. Do not plug into the USB on your computer.
-
-2. Do not connect the Sonoff to mains power.
-
-3. Press and hold the push button on the Sonoff board.
-
-4. Insert the FTDI converter USB in your computer (while holding the push button).
-
-5. After 2–3 seconds, release the push button.
-
-
-Do not connect AC power during the flash cable connection.
 
 
 Sonoff Dual:
