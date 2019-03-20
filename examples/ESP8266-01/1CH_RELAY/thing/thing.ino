@@ -16,7 +16,10 @@
 //#define LCH
 
 // FOR SONOFF
-#define SONOFF
+//#define SONOFF
+
+// FOR TYWE2S
+#define TYWE2S
 
 uint8_t RELAY1_STATE; // 0-OFF  1-ON
 
@@ -37,6 +40,17 @@ uint8_t RELAY1_OFF[RELEAY_COMMAND_SIZE] = { 0xA0, 0x01, 0x00, 0xA1};
 uint8_t BUTTON_DOWN; // 0 - UP , 1 - DOWN
 #define BUTTON_TIMEOUT  100
 uint32_t BUTTON_LAST_EXECUTE;
+#endif
+
+#if defined(TYWE2S)
+#define RELAY_PIN 12
+#define LED_PIN 4
+#define BUTTON_PIN 13
+uint8_t BUTTON_DOWN; // 0 - UP , 1 - DOWN
+#define BUTTON_TIMEOUT  100
+uint32_t BUTTON_LAST_EXECUTE;
+// define sonoff as everything else is the same
+#define SONOFF
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////

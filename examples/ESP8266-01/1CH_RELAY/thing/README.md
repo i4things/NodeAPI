@@ -132,3 +132,35 @@ The s26 is quite challenging - following is a  step by step picture based instru
 ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_12.jpg)
 
 ![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_S26_13.jpg)
+
+Smart Lighting Base (TYWE2S)
+
+Make sure that you choose Arduino IDE board profile : Generic ESP8295 Module / 1MB (no SPIFFS)
+
+Is also a challenge - the two plastic parts are actually glued together and you need to break them apart using a  screwdriver or knife.
+
+Comment out Sonoff and LCH and uncomment TYWE2S.
+
+// FOR LCH RELAY MODULE
+//#define LCH
+
+// FOR SONOFF
+//#define SONOFF
+
+// FOR TYWE2S
+#define TYWE2S
+ 
+After that follow the picture instructions below.  
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/TYWE2S_1.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/TYWE2S_2.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/TYWE2S_3.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/TYWE2S_4.jpg)
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/TYWE2S_5.jpg)
+
+
+
