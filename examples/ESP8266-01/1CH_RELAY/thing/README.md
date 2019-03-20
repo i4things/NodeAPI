@@ -142,12 +142,15 @@ Is also a challenge - the two plastic parts are actually glued together and you 
 Comment out Sonoff and LCH and uncomment TYWE2S.
 
 // FOR LCH RELAY MODULE
+
 //#define LCH
 
 // FOR SONOFF
+
 //#define SONOFF
 
 // FOR TYWE2S
+
 #define TYWE2S
  
 After that follow the picture instructions below.  
