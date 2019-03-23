@@ -6,7 +6,19 @@
 
 *** Sonoff/ESP8266-01 1,2,4 RELAYY EXAMPLES IN : /examples/ESP8266-01
 
-Node/Device/Thing  Data Send/Receive API 
+#IMPORTANT: Logging
+
+To enable logging inside the library you need to add at the begging of you main source fail/sketch:
+
+///////////////////////////////////////////////////////////////////////////////////
+// LOG constants
+#define LOG64_ENABLED
+//
+#include <Log64.h>
+
+and also make sure somewhere inside the "setup" function you have:  Serial.begin(115200);
+
+#Node/Device/Thing  Data Send/Receive API 
 
 On the node/thing side i4things provide one simple straight forward class that can be used to deliver data to the authority/server.
 ```
