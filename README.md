@@ -13,8 +13,10 @@ To switch to another one please pass the requencyRange parameter (supported opti
 On the gateway side you also need to choose a appropriate frequency:
 
 For nodes on 433 Gateway can be : 433.1, 433.3, 433.5
+
 For nodes on 868 Gateway can be : 868.1, 868.3, 868.5
-For nodes on 433 Gateway can be : 915.1, 915.3, 915.5
+
+For nodes on 915 Gateway can be : 915.1, 915.3, 915.5
 
 #IMPORTANT: Logging
 
