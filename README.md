@@ -24,8 +24,9 @@ To enable logging inside the library you need to add at the begging of you main 
 
 ///////////////////////////////////////////////////////////////////////////////////
 // LOG constants
+
 #define LOG64_ENABLED
-//
+
 #include <Log64.h>
 
 and also make sure somewhere inside the "setup" function you have:  Serial.begin(115200);
