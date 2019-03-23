@@ -6,6 +6,16 @@
 
 *** Sonoff/ESP8266-01 1,2,4 RELAYY EXAMPLES IN : /examples/ESP8266-01
 
+#FREQUENCY 
+
+The officially supported are : 433Mhz, 868Mhz and 915Mhz - default is 868Mhz
+To switch to another one please pass the requencyRange parameter (supported options are : define IoTThing_433, IoTThing_868, IoTThing_915) 
+On the gateway side you also need to choose a appropriate frequency:
+
+For nodes on 433 Gateway can be : 433.1, 433.3, 433.5
+For nodes on 868 Gateway can be : 868.1, 868.3, 868.5
+For nodes on 433 Gateway can be : 915.1, 915.3, 915.5
+
 #IMPORTANT: Logging
 
 To enable logging inside the library you need to add at the begging of you main source fail/sketch:
@@ -33,6 +43,7 @@ class IoTThing
              uint8_t key_[16],
              uint64_t id_,
              void (* receive_callback_)(uint8_t buf_[], uint8_t size_, int16_t rssi_) = NULL,
+              uint8_t requencyRange = IoTThing_868,
              uint64_t gateway_id_ = 10); // default open gateway id
 
     // call before using
