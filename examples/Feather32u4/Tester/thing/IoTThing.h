@@ -15,15 +15,16 @@
 //class IoTThing
 //{
 //  public:
-//    // constructor
-//    IoTThing(uint8_t slaveSelectPin_,
+//
+// IoTThing(uint8_t slaveSelectPin_,
 //             uint8_t interruptPin_,
 //             uint8_t resetPin_,
 //
 //             uint8_t key_[16],
 //             uint64_t id_,
-//             void (* receive_callback_)(uint8_t buf_[], uint8_t size_, int16_t rssi_) = NULL,
-//             uint64_t gateway_id_ = 10); // default open gateway id
+//             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL,
+//             uint8_t requencyRange = IoTThing_868,
+//             uint64_t gateway_id_ = IoTThing_OPEN_GATEWAY_ID);
 //
 //    // call before using
 //    void init();
@@ -133,6 +134,10 @@ class RH_RF95_IoTThing : public RH_RF95
     bool _curHFport;
 };
 
+#define IoTThing_433 0
+#define IoTThing_868 1
+#define IoTThing_915 2
+
 #define IoTThing_FREQ_CNT 3
 #define IoTThing_TIMEOUT_FREQ_CHG_COUNT 4
 #define IoTThing_MIN_RSSI  (-150)
@@ -146,7 +151,7 @@ class RH_RF95_IoTThing : public RH_RF95
 
 class IoTThing
 {
-  public :
+  public:
 
     IoTThing(uint8_t slaveSelectPin_,
              uint8_t interruptPin_,
@@ -155,6 +160,7 @@ class IoTThing
              uint8_t key_[16],
              uint64_t id_,
              void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL,
+             uint8_t requencyRange = IoTThing_868,
              uint64_t gateway_id_ = IoTThing_OPEN_GATEWAY_ID) :
       resetPin(resetPin_),
       driver(RH_RF95_IoTThing(slaveSelectPin_, interruptPin_)),
@@ -167,6 +173,13 @@ class IoTThing
     {
       memcpy(key,  key_, 16);
       randomSeed(analogRead(0));
+      switch (requencyRange)
+      {
+        case 0 : all_freq[0] = 433.1f; all_freq[1] = 433.3f,  all_freq[2] = 433.5f; break;
+        case 1 : all_freq[0] = 868.1f; all_freq[1] = 868.3f,  all_freq[2] = 868.5f; break;
+        case 2 : all_freq[0] = 915.1f; all_freq[1] = 915.3f,  all_freq[2] = 915.5f; break;
+        defailt : all_freq[0] = 868.1f; all_freq[1] = 868.3f,  all_freq[2] = 868.5f; break;
+      }
       rndFrequency();
     }
 
@@ -879,7 +892,7 @@ class IoTThing
     uint32_t wait_timeout;
 
     uint8_t freq_idx;
-    float all_freq[IoTThing_FREQ_CNT] = { 868.1f , 868.3f, 868.5f };
+    float all_freq[IoTThing_FREQ_CNT];
     uint8_t rnd_freq_idx[IoTThing_FREQ_CNT] = { 0 , 1, 2 };
     uint8_t timeout_count;
 
