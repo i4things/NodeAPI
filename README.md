@@ -23,6 +23,7 @@ For nodes on 915 Gateway can be : 915.1, 915.3, 915.5
 To enable logging inside the library you need to add at the begging of you main source fail/sketch:
 
 ///////////////////////////////////////////////////////////////////////////////////
+
 // LOG constants
 
 #define LOG64_ENABLED
