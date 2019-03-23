@@ -9,7 +9,7 @@
 #FREQUENCY 
 
 The officially supported are : 433Mhz, 868Mhz and 915Mhz - default is 868Mhz
-To switch to another one please pass the requencyRange parameter (supported options are : define IoTThing_433, IoTThing_868, IoTThing_915) 
+To switch to another one please pass the requencyRange parameter (supported options are : IoTThing_433, IoTThing_868, IoTThing_915) 
 On the gateway side you also need to choose a appropriate frequency:
 
 For nodes on 433 Gateway can be : 433.1, 433.3, 433.5
