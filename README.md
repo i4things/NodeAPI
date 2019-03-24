@@ -18,7 +18,9 @@ For nodes on 868 Gateway can be : 868.1, 868.3, 868.5
 
 For nodes on 915 Gateway can be : 915.1, 915.3, 915.5
 
-#IMPORTANT: Logging
+example : IoTThing thing(CS_PIN, INT_PIN, RST_PIN, key, thing_id, NULL, IoTThing_433);
+
+#LOGGING
 
 To enable logging inside the library you need to add at the begging of you main source fail/sketch:
 
