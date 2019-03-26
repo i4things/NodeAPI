@@ -1,3 +1,5 @@
+* IF YOU WANT TO USE VOICE CONTROL - Please read : How_To_Siri.pdf
+
 Download Arduino IDE:
 Download Arduino IDE from https://www.arduino.cc/en/Main/Software
 
