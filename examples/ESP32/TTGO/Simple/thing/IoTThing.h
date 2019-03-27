@@ -178,7 +178,7 @@ class IoTThing
         case 0 : all_freq[0] = 433.1f; all_freq[1] = 433.3f,  all_freq[2] = 433.5f; break;
         case 1 : all_freq[0] = 868.1f; all_freq[1] = 868.3f,  all_freq[2] = 868.5f; break;
         case 2 : all_freq[0] = 915.1f; all_freq[1] = 915.3f,  all_freq[2] = 915.5f; break;
-        defailt : all_freq[0] = 868.1f; all_freq[1] = 868.3f,  all_freq[2] = 868.5f; break;
+        default : all_freq[0] = 868.1f; all_freq[1] = 868.3f,  all_freq[2] = 868.5f; break;
       }
       rndFrequency();
     }
