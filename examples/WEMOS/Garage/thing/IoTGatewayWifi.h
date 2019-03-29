@@ -33,8 +33,6 @@
 #define IoTGatewayWifi_EXTENDED_TIMEOUT 30000
 #define IoTGatewayWifi_CONNECT_TIMEOUT_DEFAULT  60000
 #define IoTGatewayWifi_BUF_MAX_SIZE 1024
-#define IoTGatewayWifi_NA_SSID "N/A"
-#define IoTGatewayWifi_NA_PASS "N/A"
 #define IoTGateway_MAX_MESSAGE_LEN 51
 
 #define IoTGatewayWifi_SERVER_PORT 5409
@@ -94,53 +92,6 @@ class IoTGatewayWifi
 #endif
       disconnect();
       WiFi.begin(ssid, pass);
-
-      uint32_t my_start = millis();
-      uint32_t print_last_execute = millis();
-      uint8_t print_sec = 1;
-
-      if ((strcmp(IoTGatewayWifi_NA_SSID, ssid) != 0) || (strcmp(IoTGatewayWifi_NA_PASS, pass) != 0))
-      {
-        while ( ( WiFi.status() != WL_CONNECTED ) &&  ((((uint32_t)((uint32_t)millis()) - my_start)) < ((uint32_t)30000)) )
-        {
-          yield();
-
-          if (((uint32_t)(((uint32_t)millis()) - print_last_execute)) >= 1000)
-          {
-            print_last_execute = millis();
-#if defined (LOG64_ENABLED)
-            LOG64_SET(print_sec++);
-            LOG64_NEW_LINE;
-#endif
-          }
-        }
-      }
-
-      if (WiFi.status() != WL_CONNECTED)
-      {
-#if defined (LOG64_ENABLED)
-        LOG64_SET("> Can't connect for 30sec");
-        LOG64_NEW_LINE;
-#endif
-      }
-      else
-      {
-#if defined (LOG64_ENABLED)
-        LOG64_SET("> Connected for");
-        LOG64_SET((uint32_t)((((uint32_t)millis()) - ((uint32_t)my_start)) / ((uint32_t)1000)));
-        LOG64_SET("sec IP[");
-        LOG64_SET(String(WiFi.localIP()[0]));
-        LOG64_SET(".");
-        LOG64_SET(String(WiFi.localIP()[1]));
-        LOG64_SET(".");
-        LOG64_SET(String(WiFi.localIP()[2]));
-        LOG64_SET(".");
-        LOG64_SET(String(WiFi.localIP()[3]));
-        LOG64_SET("]");
-        LOG64_NEW_LINE;
-#endif
-      }
-
 
 #if defined (LOG64_ENABLED)
       LOG64_SET("WIFI: INIT");
