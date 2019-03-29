@@ -65,6 +65,7 @@ class IoTGateway : public IoTGatewayWifiCallback
     void init()
     {
       wifi->init();
+      gen_heartbeat();
     }
 
 
