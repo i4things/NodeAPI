@@ -1,3 +1,4 @@
+
 * IF YOU WANT TO USE VOICE CONTROL - Please read : How_To_Siri.pdf
 
 Download Arduino IDE:
@@ -104,6 +105,11 @@ S20 Smart Socket
 
 The picture on the right, shows how to program the S20 Smart Socket powered by the FTDI USB converter.
 Remember that during programming the Smart Socket is NOT connected to mains.
+
+Sonoff Slampher
+
+![Cat](https://github.com/i4things/NodeAPI/blob/master/examples/ESP8266-01/1CH_RELAY/thing/Sonoff_ESP8266_Slampher_1.jpg)
+
 
 S26 Smart Socket
 
