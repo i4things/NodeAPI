@@ -45,8 +45,8 @@
 //    // set gateway key ( in case after start needs to be changed)
 //    void set_gateway_key(uint8_t key_[16])
 //
-//    // set ssid and pass ( in case after start needs to be changed)
-//    void set_ssid_pass(const char * ssid_, const char * pass_)
+//    // set apn, user and pass ( in case after start needs to be changed)
+//    void set_apn_user_pass(const char * apn_, const char * user, const char * pass_)
 //
 //    // register to receive callback after the message has been acknowledged from the gateway
 //    void register_ack(void (* ack_callback_)(int16_t rssi_));
@@ -195,7 +195,7 @@ class IoTThing : public IoTGatewayCallback
       gateway->set_gateway_key(gateway_key_);
     }
 
-    // set apm user and pass ( in case after start needs to be changed)
+    // set apn user and pass ( in case after start needs to be changed)
     void set_apn_user_pass(const char * apn_, const char * user_, const char * pass_)
     {
       gateway->set_apn_user_pass(apn_, user_ , pass_);
