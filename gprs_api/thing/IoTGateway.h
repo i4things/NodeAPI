@@ -257,7 +257,7 @@ class IoTGateway : public IoTGatewayGprsCallback
 
       gen_internet_message(buf_gprs, size_gprs, buf_, size_);
 
-      gprs->send(buf_gprs, size_);
+      gprs->send(buf_gprs, size_gprs);
 
       waiting_type = IoTGateway_WAITING_SENT;
     }
