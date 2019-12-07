@@ -15,9 +15,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 // LOG constants
-#define LOG64_ENABLED
+//#define LOG64_ENABLED
 
-#include <Log64.h>
+//#include <Log64.h>
 
 
 // called when packet received from node
@@ -64,9 +64,9 @@ void setup() {
   MESSAGE_LAST_SEND = millis() + MESSAGE_INTERVAL * 2;
 
   // init serial
-  //Serial.begin(115200);
+  Serial.begin(115200);
   // Serial Log
-  LOG64_INIT();
+  //LOG64_INIT();
   // Initial delay to give chance to the com port to cennect
   delay(2000);
   // thing init
