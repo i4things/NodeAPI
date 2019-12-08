@@ -1478,7 +1478,8 @@ class IoTGatewayGprs
             }
             else if (GPRS_IS_RECV_DATA)
             {
-              // data arrived
+              // all data arrived we can clean the send buffer
+			     GPRS_BUF_IN_NETWORK_SIZE = 0;
 #if defined (LOG64_ENABLED)
               LOG64_SET(F("GPRS: DATA["));
               for (uint16_t i = 0; i < GPRS_RECV_DATA_SIZE; i++)
