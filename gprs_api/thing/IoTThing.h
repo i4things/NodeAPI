@@ -23,6 +23,7 @@
 //             uint8_t pin_rx_,
 //             uint8_t pin_tx_,
 //             uint8_t pin_reset_,
+//             bool pin_reset_on_high_,
 //             uint64_t id_,
 //             uint8_t key_[16],
 //             uint64_t gateway_id_,
@@ -45,8 +46,8 @@
 //    // set gateway key ( in case after start needs to be changed)
 //    void set_gateway_key(uint8_t key_[16])
 //
-//    // set apn, user and pass ( in case after start needs to be changed)
-//    void set_apn_user_pass(const char * apn_, const char * user, const char * pass_)
+//    // set ssid and pass ( in case after start needs to be changed)
+//    void set_ssid_pass(const char * ssid_, const char * pass_)
 //
 //    // register to receive callback after the message has been acknowledged from the gateway
 //    void register_ack(void (* ack_callback_)(int16_t rssi_));
@@ -133,6 +134,7 @@ class IoTThing : public IoTGatewayCallback
              uint8_t pin_rx_,
              uint8_t pin_tx_,
              uint8_t pin_reset_,
+             bool pin_reset_on_high_,
              uint64_t id_,
              uint8_t key_[16],
              uint64_t gateway_id_,
@@ -146,7 +148,7 @@ class IoTThing : public IoTGatewayCallback
       gateway_id(gateway_id_)
     {
       memcpy(key,  key_, 16);
-      gateway = new IoTGateway(apn_, user_, pass_, hardware_serial_num_, pin_rx_, pin_tx_, pin_reset_, gateway_id_, gateway_key_,  this);
+      gateway = new IoTGateway(apn_, user_, pass_, hardware_serial_num_, pin_rx_, pin_tx_, pin_reset_,  pin_reset_on_high_, gateway_id_, gateway_key_,  this);
     }
 
   public:
@@ -195,7 +197,7 @@ class IoTThing : public IoTGatewayCallback
       gateway->set_gateway_key(gateway_key_);
     }
 
-    // set apn user and pass ( in case after start needs to be changed)
+    // set apm user and pass ( in case after start needs to be changed)
     void set_apn_user_pass(const char * apn_, const char * user_, const char * pass_)
     {
       gateway->set_apn_user_pass(apn_, user_ , pass_);

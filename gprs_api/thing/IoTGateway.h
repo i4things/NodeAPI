@@ -46,6 +46,7 @@ class IoTGateway : public IoTGatewayGprsCallback
                uint8_t pin_rx_,
                uint8_t pin_tx_,
                uint8_t pin_reset_,
+                bool pin_reset_on_high_,
                uint64_t gateway_id_,
                const char * gateway_key_,
                IoTGatewayCallback * receive_callback_) :
@@ -59,7 +60,7 @@ class IoTGateway : public IoTGatewayGprsCallback
 
       hex_to_key(gateway_key_, gateway_key);
 
-      gprs = new IoTGatewayGprs(apn_, user_, pass_, hardware_serial_num_, pin_rx_, pin_tx_, pin_reset_, this);
+      gprs = new IoTGatewayGprs(apn_, user_, pass_, hardware_serial_num_, pin_rx_, pin_tx_, pin_reset_, pin_reset_on_high_, this);
 #if defined (LOG64_ENABLED)
       LOG64_SET(F("IoTG: INIT"));
       LOG64_NEW_LINE;

@@ -61,12 +61,14 @@ class IoTGatewayGprs
                    uint8_t pin_rx_,
                    uint8_t pin_tx_,
                    uint8_t pin_reset_,
+                   bool pin_reset_on_high_,
                    IoTGatewayGprsCallback * receive_callback_) :
       receive_callback(receive_callback_),
       GPRS_SERIAL(hardware_serial_num_),
       GPRS_PIN_RX(pin_rx_),
       GPRS_PIN_TX(pin_tx_),
       GPRS_PIN_RESET(pin_reset_),
+      GPRS_PIN_RESET_ON_HIGHT(pin_reset_on_high_),
       SERVER_PORT(GPRS_SERVER_PORT)
     {
       strcpy(GPRS_APN, apn_);
@@ -80,7 +82,14 @@ class IoTGatewayGprs
       GPRS_DEFAULT_BAUD();
       // reset PIN init
       pinMode(GPRS_PIN_RESET, OUTPUT);
-      digitalWrite(GPRS_PIN_RESET, HIGH);
+      if (GPRS_PIN_RESET_ON_HIGHT)
+      {
+        digitalWrite(GPRS_PIN_RESET, HIGH);
+      }
+      else
+      {
+        digitalWrite(GPRS_PIN_RESET, LOW);
+      }
 
       GPRS_SET_STATUS(GPRS_STATUS_NA, 0);
 
@@ -828,485 +837,499 @@ class IoTGatewayGprs
     }
 
     // if return false means init is done
-bool GPRS_INIT_DO_WORK()
-{
-  switch (GPRS_INIT_INDEX)
-  {
-    case 0 :
-      return false; // finished
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////// start/stop/reset
-    case 1 : // set disconnect
+    bool GPRS_INIT_DO_WORK()
+    {
+      switch (GPRS_INIT_INDEX)
       {
-        if (GPRS_FIRST_HARDWARE_RESET)
-        {
-          // fist start we want to keep it in HIGH - to not poerform swith-of and on cycle
+        case 0 :
+          return false; // finished
+
+        //////////////////////////////////////////////////////////////////////////////////////
+        ////// start/stop/reset
+        case 1 : // set disconnect
+          {
+            if (GPRS_FIRST_HARDWARE_RESET)
+            {
+              // fist start we want to keep it in HIGH - to not poerform swith-of and on cycle
 #if defined (LOG64_ENABLED)
-          LOG64_SET(F("GPRS INITIAL START WAIT 60sec"));
+              LOG64_SET(F("GPRS INITIAL START WAIT 60sec"));
+              LOG64_NEW_LINE;
+#endif
+              GPRS_FIRST_HARDWARE_RESET = false;
+            }
+            else
+            {
+              if (GPRS_PIN_RESET_ON_HIGHT)
+              {
+                digitalWrite(GPRS_PIN_RESET, LOW);
+              }
+              else
+              {
+                digitalWrite(GPRS_PIN_RESET, HIGH);
+              }
+#if defined (LOG64_ENABLED)
+              LOG64_SET(F("GPRS DISCONNECT VCC DOWN AND WAIT 60sec"));
+              LOG64_NEW_LINE;
+#endif
+            }
+            GPRS_INIT_TIME = millis();
+            GPRS_INIT_INDEX++;
+
+            GPRS_CLEAR_BAUD();
+
+          }
+          return true;
+
+        case 2 :  // wait 60000ms and connect to VCC
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 60000)
+            {
+              // init the serial
+              GPRS_NEW_BAUD(GPRS_BAUD);
+              // timeout passed set in low move to next
+#if defined (LOG64_ENABLED)
+              LOG64_SET(F("VCC SET CONNECT TO VCC - HARDWARE RESET AND - WAIT 60sec"));
+              LOG64_NEW_LINE;
+#endif
+              if (GPRS_PIN_RESET_ON_HIGHT)
+              {
+                digitalWrite(GPRS_PIN_RESET, HIGH);
+              }
+              else
+              {
+                digitalWrite(GPRS_PIN_RESET, LOW);
+              }
+#if defined (LOG64_ENABLED)
+              LOG64_SET(F("GPRS VCC UP"));
+              LOG64_NEW_LINE;
+#endif
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+
+            }
+          }
+          return true;
+        case 3 :  // wait 60000ms for GPRS to start
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 60000)
+            {
+              // timeout passed move to next
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        //////////////////////////////////////////////////////////////////////////////////////
+        ////// try 9600
+        case 4 :
+#if defined (LOG64_ENABLED)
+          LOG64_SET(F("9600"));
           LOG64_NEW_LINE;
 #endif
-          GPRS_FIRST_HARDWARE_RESET = false;
-        }
-        else
-        {
-          digitalWrite(GPRS_POWER_CONTROL_PIN, LOW);
+          GPRS_NEW_BAUD(9600);
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 5 :  // wait 2000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              // timeout passed move to next
+              GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 6 :  // wait 2000ms read all from serial
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              for (; GPRS_SERIAL.available();)
+              {
+                GPRS_SERIAL.read();
+              }
+              GPRS_CLEAR_BAUD();
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 7 :  // wait 1000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
+            {
+              // timeout passed move to next
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        //////////////////////////////////////////////////////////////////////////////////////
+        ////// try 14400
+        case 8 :
 #if defined (LOG64_ENABLED)
-          LOG64_SET(F("GPRS DISCONNECT VCC DOWN AND WAIT 60sec"));
+          LOG64_SET(F("14400"));
           LOG64_NEW_LINE;
 #endif
-        }
-        GPRS_INIT_TIME = millis();
-        GPRS_INIT_INDEX++;
+          GPRS_NEW_BAUD(14400);
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 9 :  // wait 2000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              // timeout passed move to next
+              GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 10 :  // wait 2000ms read all from serial
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              for (; GPRS_SERIAL.available();)
+              {
+                GPRS_SERIAL.read();
+              }
+              GPRS_CLEAR_BAUD();
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 11 :  // wait 1000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
+            {
+              // timeout passed move to next
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
 
-        GPRS_CLEAR_BAUD();
-
-      }
-      return true;
-
-    case 2 :  // wait 60000ms and connect to VCC
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 60000)
-        {
-          // init the serial
+        //////////////////////////////////////////////////////////////////////////////////////
+        ////// try 19200
+        case 12 :
+#if defined (LOG64_ENABLED)
+          LOG64_SET(F("19200"));
+          LOG64_NEW_LINE;
+#endif
+          GPRS_NEW_BAUD(19200);
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 13 :  // wait 2000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              // timeout passed move to next
+              GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 14 :  // wait 2000ms read all from serial
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              for (; GPRS_SERIAL.available();)
+              {
+                GPRS_SERIAL.read();
+              }
+              GPRS_CLEAR_BAUD();
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 15 :  // wait 1000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
+            {
+              // timeout passed move to next
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        //////////////////////////////////////////////////////////////////////////////////////
+        ////// try 28800
+        case 16 :
+#if defined (LOG64_ENABLED)
+          LOG64_SET(F("28800"));
+          LOG64_NEW_LINE;
+#endif
+          GPRS_NEW_BAUD(28800);
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 17 :  // wait 2000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              // timeout passed move to next
+              GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 18 :  // wait 2000ms read all from serial
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              for (; GPRS_SERIAL.available();)
+              {
+                GPRS_SERIAL.read();
+              }
+              GPRS_CLEAR_BAUD();
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 19 :  // wait 1000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
+            {
+              // timeout passed move to next
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        //////////////////////////////////////////////////////////////////////////////////////
+        ////// try 38400
+        case 20 :
+#if defined (LOG64_ENABLED)
+          LOG64_SET(F("38400"));
+          LOG64_NEW_LINE;
+#endif
+          GPRS_NEW_BAUD(38400);
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 21 :  // wait 2000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              // timeout passed move to next
+              GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 22 :  // wait 2000ms read all from serial
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              for (; GPRS_SERIAL.available();)
+              {
+                GPRS_SERIAL.read();
+              }
+              GPRS_CLEAR_BAUD();
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 23 :  // wait 1000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
+            {
+              // timeout passed move to next
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        //////////////////////////////////////////////////////////////////////////////////////
+        ////// try 57600
+        case 24 :
+#if defined (LOG64_ENABLED)
+          LOG64_SET(F("57600"));
+          LOG64_NEW_LINE;
+#endif
+          GPRS_NEW_BAUD(57600);
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 25 :  // wait 2000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              // timeout passed move to next
+              GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 26 :  // wait 2000ms read all from serial
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              for (; GPRS_SERIAL.available();)
+              {
+                GPRS_SERIAL.read();
+              }
+              GPRS_CLEAR_BAUD();
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 27 :  // wait 1000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
+            {
+              // timeout passed move to next
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        //////////////////////////////////////////////////////////////////////////////////////
+        ////// try 115200
+        case 28 :
+#if defined (LOG64_ENABLED)
+          LOG64_SET(F("115200"));
+          LOG64_NEW_LINE;
+#endif
+          GPRS_NEW_BAUD(115200);
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 29 :  // wait 2000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              // timeout passed move to next
+              GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 30 :  // wait 2000ms read all from serial
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+            {
+              for (; GPRS_SERIAL.available();)
+              {
+                GPRS_SERIAL.read();
+              }
+              GPRS_CLEAR_BAUD();
+              GPRS_INIT_TIME = millis();
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        case 31 :  // wait 1000ms
+          {
+            if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
+            {
+              // timeout passed move to next
+              GPRS_INIT_INDEX++;
+            }
+          }
+          return true;
+        //////////////////////////////////////////////////////////////////////////////////////
+        ////// INIT AND ECHO OFF
+        case 32 :
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 33 :  // wait 2000ms
+          if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+          {
+            // timeout passed move to next
+            GPRS_INIT_INDEX++;
+          }
+          return true;
+        case 34 : // init serial
           GPRS_NEW_BAUD(GPRS_BAUD);
-          // timeout passed set in low move to next
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 35 : // set time
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 36 :  // wait 2000ms
+          if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+          {
+            // timeout passed move to next
+            GPRS_INIT_INDEX++;
+          }
+          return true;
+        case 37 : // send AT echo off and set time
 #if defined (LOG64_ENABLED)
-          LOG64_SET(F("VCC SET CONNECT TO VCC - HARDWARE RESET AND - WAIT 60sec"));
+          LOG64_SET(F("GPRS: ECHO OFF"));
           LOG64_NEW_LINE;
 #endif
-          digitalWrite(GPRS_POWER_CONTROL_PIN, HIGH);
+          GPRS_SERIAL.print("ATE0\r");
+          //GPRS_SERIAL.print("ATE0\r");
+          GPRS_INIT_TIME = millis();
+          GPRS_INIT_INDEX++;
+          return true;
+        case 38 :  // wait 2000ms and read all and send AT+CMEE=1/AT+CFUN=1 and set time
+          if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+          {
+            // timeout passed read all move to next
+            for (; GPRS_SERIAL.available();)
+            {
 #if defined (LOG64_ENABLED)
-          LOG64_SET(F("GPRS VCC UP"));
+              LOG64_SET(String((char)GPRS_SERIAL.read()));
+#endif
+            }
+#if defined (LOG64_ENABLED)
+            LOG64_NEW_LINE;
+            LOG64_SET(F("GPRS: AT+CMEE=2"));
+            LOG64_NEW_LINE;
+#endif
+            GPRS_SERIAL.print("AT+CMEE=2\r");
+            GPRS_INIT_TIME = millis();
+            GPRS_INIT_INDEX++;
+          }
+          return true;
+        case 39 : // wait 2000ms and read all
+          if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
+          {
+            // timeout passed read all move to next
+            for (; GPRS_SERIAL.available();)
+            {
+#if defined (LOG64_ENABLED)
+              LOG64_SET(String((char)GPRS_SERIAL.read()));
+#endif
+            }
+#if defined (LOG64_ENABLED)
+            LOG64_NEW_LINE;
+#endif
+            GPRS_INIT_TIME = millis();
+            GPRS_INIT_INDEX++;
+          }
+          return true;
+        case 40 :  // wait 1000ms
+          if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
+          {
+            // timeout passed move to next
+            GPRS_INIT_INDEX++;
+          }
+          return true;
+        case 41 :  // finished
+#if defined (LOG64_ENABLED)
+          LOG64_SET(F("GPRS: RESET"));
           LOG64_NEW_LINE;
 #endif
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-
-        }
-      }
-      return true;
-    case 3 :  // wait 60000ms for GPRS to start
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 60000)
-        {
-          // timeout passed move to next
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////// try 9600
-    case 4 :
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("9600"));
-      LOG64_NEW_LINE;
-#endif
-      GPRS_NEW_BAUD(9600);
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 5 :  // wait 2000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          // timeout passed move to next
-          GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 6 :  // wait 2000ms read all from serial
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          for (; GPRS_SERIAL.available();)
           {
-            GPRS_SERIAL.read();
+            GPRS_INIT_INDEX = 0;
           }
-          GPRS_CLEAR_BAUD();
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 7 :  // wait 1000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
-        {
-          // timeout passed move to next
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////// try 14400
-    case 8 :
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("14400"));
-      LOG64_NEW_LINE;
-#endif
-      GPRS_NEW_BAUD(14400);
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 9 :  // wait 2000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          // timeout passed move to next
-          GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 10 :  // wait 2000ms read all from serial
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          for (; GPRS_SERIAL.available();)
-          {
-            GPRS_SERIAL.read();
-          }
-          GPRS_CLEAR_BAUD();
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 11 :  // wait 1000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
-        {
-          // timeout passed move to next
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////// try 19200
-    case 12 :
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("19200"));
-      LOG64_NEW_LINE;
-#endif
-      GPRS_NEW_BAUD(19200);
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 13 :  // wait 2000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          // timeout passed move to next
-          GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 14 :  // wait 2000ms read all from serial
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          for (; GPRS_SERIAL.available();)
-          {
-            GPRS_SERIAL.read();
-          }
-          GPRS_CLEAR_BAUD();
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 15 :  // wait 1000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
-        {
-          // timeout passed move to next
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////// try 28800
-    case 16 :
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("28800"));
-      LOG64_NEW_LINE;
-#endif
-      GPRS_NEW_BAUD(28800);
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 17 :  // wait 2000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          // timeout passed move to next
-          GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 18 :  // wait 2000ms read all from serial
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          for (; GPRS_SERIAL.available();)
-          {
-            GPRS_SERIAL.read();
-          }
-          GPRS_CLEAR_BAUD();
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 19 :  // wait 1000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
-        {
-          // timeout passed move to next
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////// try 38400
-    case 20 :
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("38400"));
-      LOG64_NEW_LINE;
-#endif
-      GPRS_NEW_BAUD(38400);
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 21 :  // wait 2000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          // timeout passed move to next
-          GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 22 :  // wait 2000ms read all from serial
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          for (; GPRS_SERIAL.available();)
-          {
-            GPRS_SERIAL.read();
-          }
-          GPRS_CLEAR_BAUD();
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 23 :  // wait 1000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
-        {
-          // timeout passed move to next
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////// try 57600
-    case 24 :
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("57600"));
-      LOG64_NEW_LINE;
-#endif
-      GPRS_NEW_BAUD(57600);
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 25 :  // wait 2000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          // timeout passed move to next
-          GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 26 :  // wait 2000ms read all from serial
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          for (; GPRS_SERIAL.available();)
-          {
-            GPRS_SERIAL.read();
-          }
-          GPRS_CLEAR_BAUD();
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 27 :  // wait 1000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
-        {
-          // timeout passed move to next
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////// try 115200
-    case 28 :
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("115200"));
-      LOG64_NEW_LINE;
-#endif
-      GPRS_NEW_BAUD(115200);
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 29 :  // wait 2000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          // timeout passed move to next
-          GPRS_SERIAL.print(String("AT\rAT\rAT+IPR=") + String(GPRS_BAUD) + String("\rAT&W\r"));
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 30 :  // wait 2000ms read all from serial
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-        {
-          for (; GPRS_SERIAL.available();)
-          {
-            GPRS_SERIAL.read();
-          }
-          GPRS_CLEAR_BAUD();
-          GPRS_INIT_TIME = millis();
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    case 31 :  // wait 1000ms
-      {
-        if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
-        {
-          // timeout passed move to next
-          GPRS_INIT_INDEX++;
-        }
-      }
-      return true;
-    //////////////////////////////////////////////////////////////////////////////////////
-    ////// INIT AND ECHO OFF
-    case 32 :
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 33 :  // wait 2000ms
-      if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-      {
-        // timeout passed move to next
-        GPRS_INIT_INDEX++;
-      }
-      return true;
-    case 34 : // init serial
-      GPRS_NEW_BAUD(GPRS_BAUD);
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 35 : // set time
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 36 :  // wait 2000ms
-      if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-      {
-        // timeout passed move to next
-        GPRS_INIT_INDEX++;
-      }
-      return true;
-    case 37 : // send AT echo off and set time
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("GPRS: ECHO OFF"));
-      LOG64_NEW_LINE;
-#endif
-      GPRS_SERIAL.print("ATE0\r");
-      //GPRS_SERIAL.print("ATE0\r");
-      GPRS_INIT_TIME = millis();
-      GPRS_INIT_INDEX++;
-      return true;
-    case 38 :  // wait 2000ms and read all and send AT+CMEE=1/AT+CFUN=1 and set time
-      if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-      {
-        // timeout passed read all move to next
-        for (; GPRS_SERIAL.available();)
-        {
-#if defined (LOG64_ENABLED)
-          LOG64_SET(String((char)GPRS_SERIAL.read()));
-#endif
-        }
-#if defined (LOG64_ENABLED)
-        LOG64_NEW_LINE;
-        LOG64_SET(F("GPRS: AT+CMEE=2"));
-        LOG64_NEW_LINE;
-#endif
-        GPRS_SERIAL.print("AT+CMEE=2\r");
-        GPRS_INIT_TIME = millis();
-        GPRS_INIT_INDEX++;
-      }
-      return true;
-    case 39 : // wait 2000ms and read all
-      if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 2000)
-      {
-        // timeout passed read all move to next
-        for (; GPRS_SERIAL.available();)
-        {
-#if defined (LOG64_ENABLED)
-          LOG64_SET(String((char)GPRS_SERIAL.read()));
-#endif
-        }
-#if defined (LOG64_ENABLED)
-        LOG64_NEW_LINE;
-#endif
-        GPRS_INIT_TIME = millis();
-        GPRS_INIT_INDEX++;
-      }
-      return true;
-    case 40 :  // wait 1000ms
-      if (((uint32_t)(((uint32_t)millis()) - GPRS_INIT_TIME)) >= 1000)
-      {
-        // timeout passed move to next
-        GPRS_INIT_INDEX++;
-      }
-      return true;
-    case 41 :  // finished
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("GPRS: RESET"));
-      LOG64_NEW_LINE;
-#endif
-      {
-        GPRS_INIT_INDEX = 0;
-      }
-      return true;
+          return true;
 
 
-  }
-}
+      }
+    }
   public:
     void work()
     {
@@ -1479,8 +1502,8 @@ bool GPRS_INIT_DO_WORK()
             else if (GPRS_IS_RECV_DATA)
             {
               // all data arrived we can clean the send buffer
-			  GPRS_BUF_IN_NETWORK_SIZE = 0;
-			  
+              GPRS_BUF_IN_NETWORK_SIZE = 0;
+
 #if defined (LOG64_ENABLED)
               LOG64_SET(F("GPRS: DATA["));
               for (uint16_t i = 0; i < GPRS_RECV_DATA_SIZE; i++)
@@ -1793,6 +1816,7 @@ bool GPRS_INIT_DO_WORK()
     uint32_t GPRS_PIN_RX;
     uint32_t GPRS_PIN_TX;
     uint32_t GPRS_PIN_RESET;
+    bool GPRS_PIN_RESET_ON_HIGHT;
 };
 
 

@@ -15,9 +15,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 // LOG constants
-//#define LOG64_ENABLED
+#define LOG64_ENABLED
 
-//#include <Log64.h>
+#include <Log64.h>
 
 
 // called when packet received from node
@@ -52,7 +52,7 @@ void received(uint8_t buf[], uint8_t size, int16_t rssi) {
 
 #define thing_id 37
 uint8_t thing_key[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-IoTThing thing(apn, user, pass, hardware_serial_num, pin_rx, pin_tx, pin_reset, thing_id, thing_key, gateway_id, gateway_key, received);
+IoTThing thing(apn, user, pass, hardware_serial_num, pin_rx, pin_tx, pin_reset, true, thing_id, thing_key, gateway_id, gateway_key, received);
 
 
 // 2 minutes
@@ -64,9 +64,9 @@ void setup() {
   MESSAGE_LAST_SEND = millis() + MESSAGE_INTERVAL * 2;
 
   // init serial
-  Serial.begin(115200);
+  //Serial.begin(115200);
   // Serial Log
-  //LOG64_INIT();
+  LOG64_INIT();
   // Initial delay to give chance to the com port to cennect
   delay(2000);
   // thing init
