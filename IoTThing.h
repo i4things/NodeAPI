@@ -12,19 +12,30 @@
    DERIVED FROM THIS SOURCE CODE FILE.
 */
 
+#pragma GCC diagnostic push
+
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wreorder"
+#pragma GCC diagnostic ignored "-Wreturn-type"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wunused-value"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
 //class IoTThing
 //{
 //  public:
-//
-// IoTThing(uint8_t slaveSelectPin_,
-//             uint8_t interruptPin_,
-//             uint8_t resetPin_,
-//
-//             uint8_t key_[16],
+//    // constructor
+//    IoTThing(const char * ssid_,
+//             const char * pass_,
 //             uint64_t id_,
-//             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL,
-//             uint8_t requencyRange = IoTThing_868,
-//             uint64_t gateway_id_ = IoTThing_OPEN_GATEWAY_ID);
+//             uint8_t key_[16],
+//            uint64_t gateway_id_,
+//             const char * gateway_key_,
+//             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL
+//            )
 //
 //    // call before using
 //    void init();
@@ -37,6 +48,12 @@
 //
 //    // set gateway id ( in case after start needs to be changed)
 //    void set_gateway_id(uint64_t gateway_id_ );
+//
+//    // set gateway key ( in case after start needs to be changed)
+//    void set_gateway_key(uint8_t key_[16])
+//
+//    // set ssid and pass ( in case after start needs to be changed)
+//    void set_ssid_pass(const char * ssid_, const char * pass_)
 //
 //    // register to receive callback after the message has been acknowledged from the gateway
 //    void register_ack(void (* ack_callback_)(int16_t rssi_));
@@ -97,148 +114,57 @@
 //    void work();
 //};
 
-#include <RH_RF95.h>
-#include <SPI.h> // Not actualy used but needed to compile
 
 #pragma push_macro("LOG64_ENABLED")
 //#undef LOG64_ENABLED
 
-class RH_RF95_IoTThing : public RH_RF95
-{
-  public:
-    RH_RF95_IoTThing(uint8_t slaveSelectPin = SS, uint8_t interruptPin = 2, RHGenericSPI& spi = hardware_spi) : RH_RF95(slaveSelectPin, interruptPin, spi)
-    {
-    }
+#include "IoTGateway.h"
 
-    bool isChannelActive()
-    {
-      _curRssi = spiRead(RH_RF95_REG_2C_RSSI_WIDEBAND);
-      if (_curHFport)
-        _curRssi -= 157;
-      else
-        _curRssi -= 164;
-
-      return (_curRssi > -128);
-    }
-
-    bool setFrequency(float centre)
-    {
-      _curHFport = (centre >= 779.0);
-      return RH_RF95::setFrequency(centre);
-    }
-
-  protected :
-
-    int8_t _curSNR;
-    int16_t _curRssi;
-    bool _curHFport;
-};
-
-#define IoTThing_433 0
-#define IoTThing_868 1
-#define IoTThing_915 2
-
-#define IoTThing_FREQ_CNT 3
-#define IoTThing_TIMEOUT_FREQ_CHG_COUNT 4
 #define IoTThing_MIN_RSSI  (-150)
 #define IoTThing_MAX_MESSAGE_LEN 31
-#define IoTThing_ACK_MESSAGE_LEN 7
 #define IoTThing_MESSAGE_TIMEOUT 60000
-#define IoTThing_ACK_TIMEOUT 400
-#define IoTThing_MAX_ACK_TIMEOUT 5000
 #define IoTThing_MAGIC 8606
 #define IoTThing_OPEN_GATEWAY_ID 10
+#define IoTThing_WAIT_NA 0
+#define IoTThing_WAIT_ACK 1
+#define IoTThing_WAIT_TIMEOUT 2
 
-class IoTThing
+class IoTThing : public IoTGatewayCallback
 {
-  public:
+  public :
 
-    IoTThing(uint8_t slaveSelectPin_,
-             uint8_t interruptPin_,
-             uint8_t resetPin_,
-
-             uint8_t key_[16],
+    IoTThing(const char * ssid_,
+             const char * pass_,
              uint64_t id_,
-             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL,
-             uint8_t requencyRange = IoTThing_868,
-             uint64_t gateway_id_ = IoTThing_OPEN_GATEWAY_ID) :
-      resetPin(resetPin_),
-      driver(RH_RF95_IoTThing(slaveSelectPin_, interruptPin_)),
+             uint8_t key_[16],
+             uint64_t gateway_id_,
+             const char * gateway_key_,
+             void (* receive_callback_)(uint8_t buf_[], uint8_t size, int16_t rssi) = NULL ) :
       id(id_),
       ack_callback(NULL),
       timeout_callback(NULL),
+      wait_ack(IoTThing_WAIT_NA),
       receive_callback(receive_callback_),
-      freq_idx(0),
       gateway_id(gateway_id_)
     {
       memcpy(key,  key_, 16);
-      randomSeed(analogRead(0));
-      switch (requencyRange)
-      {
-        case 0 : all_freq[0] = 433.1f; all_freq[1] = 433.3f,  all_freq[2] = 433.5f; break;
-        case 1 : all_freq[0] = 868.1f; all_freq[1] = 868.3f,  all_freq[2] = 868.5f; break;
-        case 2 : all_freq[0] = 915.1f; all_freq[1] = 915.3f,  all_freq[2] = 915.5f; break;
-        default : all_freq[0] = 868.1f; all_freq[1] = 868.3f,  all_freq[2] = 868.5f; break;
-      }
-      rndFrequency();
+      gateway = new IoTGateway(ssid_, pass_, gateway_id_, gateway_key_,  this);
     }
 
   public:
     // call before using
     void init()
     {
-      timeout = false;
-      last = 0;
+      gateway->init();
+
       total = 0;
       total_ack = 0;
       total_recv = 0;
       total_retransmit = 0;
-      rssi = IoTThing_MIN_RSSI;
-      active_start = 0;
-      active_start_a = 0;
-      timeout_count = 0;
 
       seq = random(126) + 1; // as * -1 is used for ack
-      a = NULL;
       q = NULL;
-      ack = NULL;
-      start_ack = 0;
-      timeout_ack = 0;
       buf_size = 0;
-
-      pinMode(resetPin, OUTPUT);
-      digitalWrite(resetPin, HIGH);
-      // manual reset
-      digitalWrite(resetPin, LOW);
-      delay(10);
-      digitalWrite(resetPin, HIGH);
-      delay(10);
-
-      if (!driver.init())
-      {
-#if defined (LOG64_ENABLED)
-        LOG64_SET(F("IoTT: INIT FAILED"));
-        LOG64_NEW_LINE;
-#endif
-      }
-
-#if defined (LOG64_ENABLED)
-      LOG64_SET(F("IoTT: FREQ : "));
-      LOG64_SET(String(getFrequency(), 2));
-      LOG64_NEW_LINE;
-#endif
-      if (!driver.setFrequency(getFrequency()))
-      {
-#if defined (LOG64_ENABLED)
-        LOG64_SET(F("IoTT: FREQ FAILED"));
-        LOG64_SET(getFrequency());
-        LOG64_NEW_LINE;
-#endif
-      }
-
-      // max power
-      driver.setTxPower(23, false);
-      driver.available(); // turns the driver ON
 
 #if defined (LOG64_ENABLED)
       LOG64_SET(F("IoTT: INIT"));
@@ -262,6 +188,19 @@ class IoTThing
     void set_gateway_id(uint64_t gateway_id_ )
     {
       gateway_id = gateway_id_;
+      gateway->set_gateway_id(gateway_id_);
+    }
+
+    // set gateway key ( in case after start needs to be changed)
+    void set_gateway_key(const char * gateway_key_)
+    {
+      gateway->set_gateway_key(gateway_key_);
+    }
+
+    // set ssid ( in case after start needs to be changed)
+    void set_ssid_pass(const char * ssid_, const char * pass_)
+    {
+      gateway->set_ssid_pass(ssid_, pass_);
     }
 
     // register for to receive callback after the message has been acknowledged from the gateway
@@ -280,16 +219,7 @@ class IoTThing
     // return signal strength in %
     uint8_t signal_strength()
     {
-      int16_t rssi_ = ((rssi - IoTThing_MIN_RSSI) * 100) / (IoTThing_MIN_RSSI * (-1));
-      if (rssi_ < 0)
-      {
-        rssi_ = 0;
-      }
-      else if (rssi_ > 100)
-      {
-        rssi_ = 100;
-      }
-      return rssi_;
+      return gateway->signal_strength();
     }
 
 
@@ -346,7 +276,7 @@ class IoTThing
       };
 
       uint32_t  dis_ = (uint32_t)round((value_ - min_) / dev_);
-      memcpy((void *)&buf_[pos_], (void *) &dis_, container_size_);
+      memcpy((void *)buf_[pos_], (void *) &dis_, container_size_);
       pos_ += container_size_;
     }
 
@@ -371,7 +301,7 @@ class IoTThing
       };
 
       uint32_t c = 0;
-      memcpy((void *) &c, (void *) &buf_[pos_], container_size_);
+      memcpy((void *) &c, (void *)buf_[pos_], container_size_);
       pos_ += container_size_;
       return (min_ + (((double)c)  * dev_));
     }
@@ -395,7 +325,7 @@ class IoTThing
     // payload max size 31
     bool send(uint8_t buf_[], uint8_t size_)
     {
-      if ((q != NULL) || (ack != NULL))
+      if (q != NULL)
       {
 #if defined (LOG64_ENABLED)
         LOG64_SET(F("IoTT: NO SPACE FOR MSG."));
@@ -403,7 +333,7 @@ class IoTThing
 #endif
         return false;
       }
-      if ((size_ >= driver.maxMessageLength()) || (size_ > (IoTThing_MAX_MESSAGE_LEN)))
+      if  (size_ > (IoTThing_MAX_MESSAGE_LEN))
       {
 #if defined (LOG64_ENABLED)
         LOG64_SET(F("IoTT: MSG TOO BIG["));
@@ -436,8 +366,8 @@ class IoTThing
       memcpy(buf, raw , pos_);
       buf_size = pos_;
       q = buf;
-      last = millis();
-      timeout = false;
+      wait_ack = IoTThing_WAIT_ACK;
+      wait_ack_start = millis();
 
       return true;
     }
@@ -445,30 +375,21 @@ class IoTThing
     // return true - if all previouse tasks has been completed and ready to accept new data
     bool is_ready()
     {
-      return ((q == NULL) && (ack == NULL));
+      return (q == NULL) && ((wait_ack == IoTThing_WAIT_NA) || (wait_ack == IoTThing_WAIT_TIMEOUT));
     }
 
     // return true - if last message sending has hit timeout and failed
     bool timeout_hit()
     {
-      return timeout;
+      return (wait_ack == IoTThing_WAIT_TIMEOUT);
     }
 
     // call if you want to stop retry's to send the message
     void cancel()
     {
-      if ((q == NULL) && (ack != NULL))
+      if (wait_ack == IoTThing_WAIT_ACK)
       {
-        last = 0;
-        timeout = true;
-        seq = 1; // as * -1 is used for ack
-        q = NULL;
-        ack = NULL;
-        start_ack = 0;
-        timeout_ack = 0;
-        buf_size = 0;
-        timeout_count = 0;
-
+        wait_ack = IoTThing_WAIT_TIMEOUT;
 #if defined (LOG64_ENABLED)
         LOG64_SET(F("IoTT: MESSAGE CANCELED"));
         LOG64_NEW_LINE;
@@ -477,238 +398,81 @@ class IoTThing
     }
 
   public :
-    // please call in the main loop to be able to dispatch data and menage logic
 
-
-    void work()
+    virtual void received(uint8_t buf_[], uint8_t size_)
     {
-      if (a == NULL)
+      total_recv++;
+      if (receive_callback != NULL)
       {
-        uint8_t buf_[IoTThing_MAX_MESSAGE_LEN + 18 + 1];
-        uint8_t size_ = IoTThing_MAX_MESSAGE_LEN + 18 + 1;
-
-        if (driver.recv(buf_, &size_))
+        int16_t rssi_ = (IoTGateway_MIN_RSSI  * (100 - ((int16_t)gateway->signal_strength()))) / 100;
+        //crc
+        //seq
+        uint8_t sz = 2;
+        get_ots(buf_, sz); // target
+        get_ots(buf_, sz); // source
+        size_t out_size = 0;
+        uint8_t * dec = xxtea_decrypt(&buf_[sz], size_ - sz, key, & out_size);
+        if ((dec != NULL) && (out_size > 0) && (dec[0] == crc(dec, (uint16_t)out_size, 1)))
         {
-          if (size_ <=  (IoTThing_MAX_MESSAGE_LEN + 18 + 1) )
-          {
-            if (crc_chk(buf_, size_))
-            {
-              if (get_id_to(buf_, 2) == id)
-              {
-                rssi = driver.lastRssi();
-
-                //possible ack
-                int8_t msg_seq = get_seq(buf_, 1);
-                if (msg_seq < 0)
-                {
-                  if (ack != NULL)
-                  {
-                    // ack
-                    total_ack++;
-                    if ((++seq) > 126)
-                    {
-                      seq = 1; // as * -1 is used for ack
-                    }
-                    ack = NULL;
-                    last = 0;
-                    buf_size = 0;
-                    timeout_count = 0;
-
-                    if (ack_callback != NULL)
-                    {
-                      ack_callback(rssi);
-                    }
-                  }
-                }
-                else
-                {
-                  total_recv++;
-                  get_ack(buf_, buf_a, buf_a_size);
-                  a = buf_a;
-                  if (receive_callback != NULL)
-                  {
-                    //crc
-                    //seq
-                    uint8_t sz = 2;
-                    get_ots(buf_, sz); // target
-                    get_ots(buf_, sz); // source
-                    size_t out_size = 0;
-                    uint8_t * dec = xxtea_decrypt(&buf_[sz], size_ - sz, key, & out_size);
-                    if ((dec != NULL) && (out_size > 0) && (dec[0] == crc(dec, (uint16_t)out_size, 1)))
-                    {
-                      receive_callback(&dec[1], (uint8_t)(out_size - 1), rssi);
-                    }
-                    else
-                    {
-#if defined (LOG64_ENABLED)
-                      LOG64_SET(F("IoTT: CRC CHECK FOR RECEIVED MSG FAILED"));
-                      LOG64_NEW_LINE;
-#endif
-                    }
-                    if (dec != NULL)
-                    {
-                      free(dec);
-                    }
-                  }
-                }
-              }
-            }
-            else
-            {
-#if defined (LOG64_ENABLED)
-              LOG64_SET(F("IoTT: CRC CHECK FAILED"));
-              LOG64_NEW_LINE;
-#endif
-            }
-          }
+          receive_callback(&dec[1], (uint8_t)(out_size - 1), rssi_);
         }
-      }
-
-
-      if (a != NULL)
-      {
-        // we really have something for dispatch
-        bool active = driver.isChannelActive();
-        if (active)
+        else
         {
-          if (active_start_a == 0)
-          {
-            // clear low priority dispatch if waiting for free channel
-            active_start = 0;
-
-            //start the waiting
-            active_start_a = millis();
-            wait_timeout = random(IoTThing_ACK_TIMEOUT, 2 * IoTThing_ACK_TIMEOUT);
-          }
-          else
-          {
-            if (((uint32_t)(((uint32_t)millis()) - active_start_a)) >= wait_timeout);
-            {
-              active = false;
 #if defined (LOG64_ENABLED)
-              LOG64_SET("IoTT : ACK : ACTIVE TIMEOUT HIT");
-              LOG64_NEW_LINE;
-#endif
-            }
-          }
-        }
-        if (!active)
-        {
-          send_to_driver(buf_a, buf_a_size);
-          active_start_a = 0;
-          a = NULL;
-        }
-      }
-      else if (q != NULL)
-      {
-        bool active = driver.isChannelActive();
-        if (active)
-        {
-          if (active_start == 0)
-          {
-
-            //start the waiting
-            active_start = millis();
-            wait_timeout = random(IoTThing_ACK_TIMEOUT, 2 * IoTThing_ACK_TIMEOUT);
-          }
-          else
-          {
-            if (((uint32_t)(((uint32_t)millis()) - active_start)) >= wait_timeout);
-            {
-              active = false;
-#if defined (LOG64_ENABLED)
-              LOG64_SET("IoTT : ACTIVE TIMEOUT HIT");
-              LOG64_NEW_LINE;
-#endif
-            }
-          }
-        }
-        if (!active)
-        {
-          send_to_driver(buf, buf_size);
-          total++;
-          ack = q;
-          q = NULL;
-          start_ack = millis();
-          uint32_t timeout_divider = IoTThing_MAX_ACK_TIMEOUT / IoTThing_ACK_TIMEOUT;
-          timeout_ack = (((uint8_t)random(timeout_divider)) * IoTThing_ACK_TIMEOUT) + (IoTThing_ACK_TIMEOUT * 3)  + ((uint32_t)random(100));
-          active_start = 0;
-        }
-      }
-
-      if ((q == NULL) && (ack != NULL) && (((uint32_t)(((uint32_t)millis()) - start_ack)) > timeout_ack))
-      {
-#if defined (LOG64_ENABLED)
-        LOG64_SET(F("IoTT: RETRANSMIT"));
-        LOG64_NEW_LINE;
-#endif
-        if ((++timeout_count) >= IoTThing_TIMEOUT_FREQ_CHG_COUNT)
-        {
-          timeout_count = 0;
-          changeFrequency();
-          if (!driver.setFrequency(getFrequency()))
-          {
-#if defined (LOG64_ENABLED)
-            LOG64_SET(F("IoTT: FREQ FAILED"));
-            LOG64_SET(getFrequency());
-            LOG64_NEW_LINE;
-#endif
-          }
-#if defined (LOG64_ENABLED)
-          LOG64_SET(F("IoTT: FREQ : "));
-          LOG64_SET(String(getFrequency(), 2));
+          LOG64_SET(F("IoTT: CRC CHECK FOR RECEIVED MSG FAILED"));
           LOG64_NEW_LINE;
 #endif
         }
-
-        total_retransmit++;
-        q = ack;
-        ack = NULL;
-        rssi = IoTThing_MIN_RSSI;
-      }
-
-      if (((q == NULL) && (ack != NULL)) &&  (((uint32_t)(((uint32_t)millis()) - last)) > IoTThing_MESSAGE_TIMEOUT))
-      {
-#if defined (LOG64_ENABLED)
-        LOG64_SET(F("IoTT: TIMEOUT"));
-        LOG64_NEW_LINE;
-#endif
-        cancel();
-
-        if (timeout_callback != NULL)
+        if (dec != NULL)
         {
-          timeout_callback(IoTThing_MESSAGE_TIMEOUT);
+          free(dec);
+        }
+      }
+    }
+
+    virtual void data_sent_successfully()
+    {
+      wait_ack = IoTThing_WAIT_NA;
+      // ack
+      total_ack++;
+      if (ack_callback != NULL)
+      {
+
+        int16_t rssi_ = (IoTGateway_MIN_RSSI  * (100 - ((int16_t)gateway->signal_strength()))) / 100;
+        ack_callback(rssi_);
+      }
+    }
+
+    // please call in the main loop to be able to dispatch data and menage logic
+    void work()
+    {
+      gateway->work();
+
+      if (wait_ack == IoTThing_WAIT_ACK)
+      {
+        if ((wait_ack == IoTThing_WAIT_ACK) && (((uint32_t)(((uint32_t)millis()) - wait_ack_start)) >= IoTThing_MESSAGE_TIMEOUT))
+        {
+          wait_ack == IoTThing_WAIT_TIMEOUT;
+          if (timeout_callback != NULL)
+          {
+            timeout_callback(IoTThing_MESSAGE_TIMEOUT);
+          }
+          cancel();
         }
       }
 
+      if (q != NULL)
+      {
+        gateway->send(buf, buf_size);
+        total++;
+        q = NULL;
+        if ((++seq) > 126)
+        {
+          seq = 1; // as * -1 is used for ack
+        }
+        buf_size = 0;
+      }
     };
-
-  private :
-
-    void rndFrequency()
-    {
-      for (uint8_t i = 0; i < (IoTThing_FREQ_CNT - 1); i++)
-      {
-        uint8_t x = random(i, IoTThing_FREQ_CNT );
-        uint8_t t = rnd_freq_idx[i];
-        rnd_freq_idx[i] = rnd_freq_idx[x];
-        rnd_freq_idx[x] = t;
-      }
-    }
-
-    float getFrequency()
-    {
-      return all_freq[rnd_freq_idx[freq_idx]];
-    }
-
-    void changeFrequency()
-    {
-      if ((++freq_idx) == IoTThing_FREQ_CNT)
-      {
-        rndFrequency();
-        freq_idx = 0;
-      }
-    }
 
   private:
 
@@ -727,67 +491,6 @@ class IoTThing
       return (uint8_t)(res & 0xFF);
     }
 
-    // check message checksum
-    bool crc_chk(uint8_t buf_[],
-                 uint8_t size_)
-    {
-      return (buf_[0] == crc(buf_, size_, 1));
-    }
-
-    // extract the sequence from a message
-    int8_t get_seq(uint8_t buf_[], uint8_t pos)
-    {
-      return (int8_t)buf_[pos];
-    }
-
-    // extract the id to from a message
-    uint64_t get_id_to(uint8_t buf_[], uint8_t pos_)
-    {
-      return get_ots(buf_, pos_);
-    }
-
-    // format byte(len), byte(crc), byte(seq), byte[4](receiver_id)
-    // len 7
-    // seq >=-127 - 0 is not valid sequence
-    void get_ack(uint8_t buf_[], uint8_t buf_ack[], uint8_t & ack_size)
-    {
-      uint8_t pos_;
-      // read
-      pos_ = 2;
-      uint64_t to_id = get_ots(buf_, pos_);
-      uint64_t from_id = get_ots(buf_, pos_);
-      // write
-      //buf_ack[0] = crc;
-      buf_ack[1] = (uint8_t)(((int8_t)buf_[1]) * ((int8_t) - 1));
-      pos_ = 2;
-      put_ots(from_id, buf_ack, pos_ );
-      buf_ack[0] = crc(buf_ack, pos_ , 1);
-      ack_size = pos_;
-    }
-
-    // send message to driver
-    void send_to_driver(uint8_t buf_[], uint8_t size_)
-    {
-      if (!driver.send(buf_, size_))
-      {
-#if defined (LOG64_ENABLED)
-        LOG64_SET(F("IoTT: SEND FAILED"));
-        LOG64_NEW_LINE;
-#endif
-      }
-      else if (!driver.waitPacketSent(IoTThing_ACK_TIMEOUT))
-      {
-        // need reinit
-#if defined (LOG64_ENABLED)
-        LOG64_SET(F("IoTT: DRIVER BLOCKED : RESET"));
-        LOG64_NEW_LINE;
-#endif
-        init();
-
-        return;
-      }
-
-    }
   private:
     static uint64_t get_ots(uint8_t buf_[], uint8_t & pos_)
     {
@@ -861,44 +564,30 @@ class IoTThing
   private :
     uint8_t buf[IoTThing_MAX_MESSAGE_LEN + 18 + 1];
     uint8_t buf_size;
-    uint8_t buf_a[IoTThing_MAX_MESSAGE_LEN + 18 + 1];
-    uint8_t buf_a_size;
     int8_t seq; // as * -1 is used for ack
-    uint8_t * a;
-    uint8_t * q; // used as flaf
-    uint8_t * ack; // used as flag
-    uint32_t start_ack;
-    uint32_t timeout_ack;
+    uint8_t * q; // used as flag
 
     uint32_t total;
     uint32_t total_ack;
     uint32_t total_recv;
     uint32_t total_retransmit;
 
-    bool timeout;
     uint8_t resetPin;
-    uint32_t last;
 
     uint8_t __attribute__ ((aligned (4))) key[16];
     uint64_t id;
 
-    RH_RF95_IoTThing driver;
     void (* ack_callback)(int16_t rssi_);
     void (* timeout_callback)(uint16_t timeout_);
-    int16_t rssi;
-
-    uint32_t active_start;
-    uint32_t active_start_a;
-    uint32_t wait_timeout;
-
-    uint8_t freq_idx;
-    float all_freq[IoTThing_FREQ_CNT];
-    uint8_t rnd_freq_idx[IoTThing_FREQ_CNT] = { 0 , 1, 2 };
-    uint8_t timeout_count;
 
     uint64_t gateway_id;
 
+    uint8_t wait_ack;
+    uint32_t wait_ack_start;
+
     void (* receive_callback)(uint8_t buf_[], uint8_t size_, int16_t rssi_);
+
+    IoTGateway *  gateway;
 
   private :
     /**********************************************************\
@@ -1074,3 +763,4 @@ class IoTThing
 };
 
 #pragma pop_macro("LOG64_ENABLED")
+#pragma GCC diagnostic pop
