@@ -142,7 +142,7 @@ const char * GPRS_COMMAND[GPRS_STATE_LEN][4][2] =
     { NULL, NULL}
   },
   {
-    { "@DATA@", NULL}, // 17 data send special handling when you send the actual data you receive first " " next SEND OK next 0x0A and next the server response
+    { "@DATA@", NULL}, // 17 data send special handling when you send the actual data you receive first " " next SEND OK next 0x0A and next the server response -- custom handling - make sure you have set GPRS_DATA_AT_INDEX to point this index
     { "SEND OK", NULL},
     { NULL, NULL},
     { NULL, NULL}
@@ -170,33 +170,33 @@ const char * GPRS_COMMAND[GPRS_STATE_LEN][4][2] =
 // max timeout for operation in msec
 uint32_t GPRS_TIMEOUT[GPRS_STATE_LEN] =
 {
-  300000, // 0 soft restart
+  400000, // 0 soft restart
   20000,  // 1 echo off
-  20000,  // 1 all services
-  20000,  // 1 stop sms notify
-  60000,  // 2 query SIM card available
-  210000, // 3 query registration
-  30000,  // 4 query signal
-  30000,  // 5 deactivate the bearer context
-  15000,  // 6 APN, USER, PASS
-  30000,  // 7 set the GPRS attach
-  30000,  // 8 query the GPRS attach status
-  30000,  // 9 activate the PPP connection
-  30000,  // 10 query the PPP connection status
-  10000,  // 11 Set normal mode
-  10000, // 12 set ">" and SEND OK
-  30000,  // 13 setup tcp connection
-  10000, // 14 tcp send
-  120000, // 15 data send
-  120000, // 16 data receive
-  30000,  // 17 tcp close
-  30000   // 18 detach PPP
+  20000,  // 2 all services
+  20000,  // 3 stop sms notify
+  60000,  // 4 query SIM card available
+  210000, // 5 query registration
+  30000,  // 6 query signal
+  30000,  // 7 deactivate the bearer context
+  15000,  // 8 APN, USER, PASS
+  30000,  // 9 set the GPRS attach
+  30000,  // 10 query the GPRS attach status
+  60000,  // 11 activate the PPP connection
+  30000,  // 12 query the PPP connection status
+  15000,  // 13 Set normal mode
+  15000,  // 14 set ">" and SEND OK
+  30000,  // 15 setup tcp connection
+  30000,  // 16 tcp send
+  120000, // 17 data send
+  120000, // 18 data receive
+  30000,  // 19 tcp close
+  30000   // 20 detach PPP
 };
 
-// wait after execute the command - this will eat from thr timeout - e.g. make sure the timeot is properly calculated
+// wait after execute the command - this will eat from the timeout - e.g. make sure the timeot is properly calculated
 uint32_t GPRS_TIMEOUT_BEFORE_RESULT[GPRS_STATE_LEN] =
 {
-  30000,  // 0 soft restart
+  100000,  // 0 soft restart
   500,   // 1 echo off
   500,   // 1 all services
   500,   // 1 stop sms noifyy
@@ -224,7 +224,7 @@ uint32_t GPRS_TIMEOUT_BEFORE_RESULT[GPRS_STATE_LEN] =
 uint32_t GPRS_COMMAND_RETRY[GPRS_STATE_LEN] =
 {
   0,    // 0 soft restart
-  0,    // 1 echo off
+  1,    // 1 echo off
   0,    // 1 all services
   0,    // 1 estop sms notify
   5,    // 2 query SIM card available

@@ -40,6 +40,13 @@
 #define GPRS_SOFT_RESET_MAX 2
 
 #define GPRS_SKIP_RESPONSE "+XDRVI:"
+#define GPRS_SKIP_RDY "RDY"
+#define GPRS_SKIP_CFUN "+CFUN: 1"
+#define GPRS_SKIP_CPIN "+CPIN: READY"
+#define GPRS_SKIP_CALL "Call Ready"
+#define GPRS_SKIP_SMS "SMS Ready"
+#define GPRS_SKIP_STAT "IP STATUS"
+#define GPRS_SKIP_INIT "IP INITIAL"
 
 #include "IoTSim800l.h"
 
@@ -731,6 +738,83 @@ class IoTGatewayGprs
       return ret;
     }
 
+    inline bool GPRS_IS_RDY(char response[])
+    {
+
+      if (strstr(response, GPRS_SKIP_RDY) != NULL)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    inline bool GPRS_IS_CFUN(char response[])
+    {
+
+      if (strstr(response, GPRS_SKIP_CFUN) != NULL)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    inline bool GPRS_IS_CPIN(char response[])
+    {
+
+      if (strstr(response, GPRS_SKIP_CPIN) != NULL)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    inline bool GPRS_IS_CALL(char response[])
+    {
+
+      if (strstr(response, GPRS_SKIP_CALL) != NULL)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    inline bool GPRS_IS_SMS(char response[])
+    {
+
+      if (strstr(response, GPRS_SKIP_SMS) != NULL)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    inline bool GPRS_IS_STAT(char response[])
+    {
+
+      if (strstr(response, GPRS_SKIP_STAT) != NULL)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    inline bool GPRS_IS_INIT(char response[])
+    {
+
+      if (strstr(response, GPRS_SKIP_INIT) != NULL)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
     inline void GPRS_HARD_RESET(bool too_many_soft_reset)
     {
       if (too_many_soft_reset)
@@ -776,7 +860,7 @@ class IoTGatewayGprs
       return GPRS_CSQ_STRENGTH;
     }
 
-    inline const uint8_t GPRS_CSQ_TO_STRENGTH_PERCENT(uint16_t csq)
+    inline uint8_t GPRS_CSQ_TO_STRENGTH_PERCENT(uint16_t csq)
     {
       uint8_t s;
 
@@ -1515,7 +1599,7 @@ class IoTGatewayGprs
               LOG64_SET(F("]"));
               LOG64_NEW_LINE;
 #endif
-              // all data sedn and resonse received
+              // all data send and resonse received
               receive_callback->data_sent(0);
               //process response(s)
               uint16_t start_index = 0;
@@ -1645,6 +1729,62 @@ class IoTGatewayGprs
                 {
 #if defined (LOG64_ENABLED)
                   LOG64_SET(F("GPRS: RESPONSE IS NOISE - SKIP."));
+                  LOG64_NEW_LINE;
+#endif
+                }
+                //check for RDY
+                else if (GPRS_IS_RDY(GPRS_DATA))
+                {
+#if defined (LOG64_ENABLED)
+                  LOG64_SET(F("GPRS: RESPONSE IS RDY - SKIP."));
+                  LOG64_NEW_LINE;
+#endif
+                }
+                //check for CFUN
+                else if (GPRS_IS_CFUN(GPRS_DATA))
+                {
+#if defined (LOG64_ENABLED)
+                  LOG64_SET(F("GPRS: RESPONSE IS CFUN - SKIP."));
+                  LOG64_NEW_LINE;
+#endif
+                }
+                //check for CPIN
+                else if (GPRS_IS_CPIN(GPRS_DATA))
+                {
+#if defined (LOG64_ENABLED)
+                  LOG64_SET(F("GPRS: RESPONSE IS CPIN - SKIP."));
+                  LOG64_NEW_LINE;
+#endif
+                }
+                //check for CALL
+                else if (GPRS_IS_CALL(GPRS_DATA))
+                {
+#if defined (LOG64_ENABLED)
+                  LOG64_SET(F("GPRS: RESPONSE IS CALL - SKIP."));
+                  LOG64_NEW_LINE;
+#endif
+                }
+                //check for SMS
+                else if (GPRS_IS_SMS(GPRS_DATA))
+                {
+#if defined (LOG64_ENABLED)
+                  LOG64_SET(F("GPRS: RESPONSE IS SMS - SKIP."));
+                  LOG64_NEW_LINE;
+#endif
+                }
+                //check for STAT
+                else if (GPRS_IS_STAT(GPRS_DATA))
+                {
+#if defined (LOG64_ENABLED)
+                  LOG64_SET(F("GPRS: RESPONSE IS STAT - SKIP."));
+                  LOG64_NEW_LINE;
+#endif
+                }
+                //check for INIT
+                else if (GPRS_IS_INIT(GPRS_DATA))
+                {
+#if defined (LOG64_ENABLED)
+                  LOG64_SET(F("GPRS: RESPONSE IS INIT - SKIP."));
                   LOG64_NEW_LINE;
 #endif
                 }

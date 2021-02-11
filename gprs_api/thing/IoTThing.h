@@ -11,6 +11,17 @@
    DISTRIBUTION OF PROGRAMS OR FILES CREATED FROM, BASED ON, AND/OR
    DERIVED FROM THIS SOURCE CODE FILE.
 */
+#pragma GCC diagnostic push
+
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wreorder"
+#pragma GCC diagnostic ignored "-Wreturn-type"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wunused-value"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wwrite-strings"
 
 //class IoTThing
 //{
@@ -46,8 +57,8 @@
 //    // set gateway key ( in case after start needs to be changed)
 //    void set_gateway_key(uint8_t key_[16])
 //
-//    // set ssid and pass ( in case after start needs to be changed)
-//    void set_ssid_pass(const char * ssid_, const char * pass_)
+//     set apn user and pass (in case after start needs to be changed)
+//     void set_apn_user_pass(const char * apn_, const char * user_, const char * pass_);
 //
 //    // register to receive callback after the message has been acknowledged from the gateway
 //    void register_ack(void (* ack_callback_)(int16_t rssi_));
@@ -197,7 +208,7 @@ class IoTThing : public IoTGatewayCallback
       gateway->set_gateway_key(gateway_key_);
     }
 
-    // set apm user and pass ( in case after start needs to be changed)
+    // set apn user and pass ( in case after start needs to be changed)
     void set_apn_user_pass(const char * apn_, const char * user_, const char * pass_)
     {
       gateway->set_apn_user_pass(apn_, user_ , pass_);
@@ -455,7 +466,7 @@ class IoTThing : public IoTGatewayCallback
           wait_ack == IoTThing_WAIT_TIMEOUT;
           if (timeout_callback != NULL)
           {
-            timeout_callback(IoTThing_MESSAGE_TIMEOUT);
+            timeout_callback((uint16_t)IoTThing_MESSAGE_TIMEOUT);
           }
           cancel();
         }
@@ -763,3 +774,4 @@ class IoTThing : public IoTGatewayCallback
 };
 
 #pragma pop_macro("LOG64_ENABLED")
+#pragma GCC diagnostic pop
