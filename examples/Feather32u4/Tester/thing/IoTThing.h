@@ -12,6 +12,19 @@
    DERIVED FROM THIS SOURCE CODE FILE.
 */
 
+#pragma GCC diagnostic push
+
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wreorder"
+#pragma GCC diagnostic ignored "-Wreturn-type"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wunused-value"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
+
 //class IoTThing
 //{
 //  public:
@@ -582,7 +595,7 @@ class IoTThing
           }
           else
           {
-            if (((uint32_t)(((uint32_t)millis()) - active_start_a)) >= wait_timeout);
+            if (((uint32_t)(((uint32_t)millis()) - active_start_a)) >= wait_timeout)
             {
               active = false;
 #if defined (LOG64_ENABLED)
@@ -613,7 +626,7 @@ class IoTThing
           }
           else
           {
-            if (((uint32_t)(((uint32_t)millis()) - active_start)) >= wait_timeout);
+            if (((uint32_t)(((uint32_t)millis()) - active_start)) >= wait_timeout)
             {
               active = false;
 #if defined (LOG64_ENABLED)
@@ -1074,3 +1087,4 @@ class IoTThing
 };
 
 #pragma pop_macro("LOG64_ENABLED")
+#pragma GCC diagnostic pop
